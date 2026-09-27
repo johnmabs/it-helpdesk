@@ -43,6 +43,7 @@ describe("LoginUser", () => {
       userId: "user-1",
       email: "john@example.com",
       role: UserRole.TECHNICIAN,
+      sessionVersion: 0,
     });
   });
 

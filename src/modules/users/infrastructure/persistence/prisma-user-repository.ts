@@ -1,10 +1,12 @@
 import { prisma } from "@/shared/database/prisma";
 
 import { User } from "../../domain/user";
+import { UserRole } from "../../domain/user-role";
 import {
   AuthenticationUser,
   PersistUserInput,
   UserRepository,
+  UserSessionState,
 } from "../../domain/user-repository";
 import { UserMapper } from "./user-mapper";
 
@@ -44,9 +46,31 @@ export class PrismaUserRepository implements UserRepository {
       id: raw.id,
       email: raw.email,
       passwordHash: raw.passwordHash,
-      role: raw.role,
+      role: UserRole[raw.role],
       active: raw.active,
+      sessionVersion: raw.sessionVersion,
     };
+  }
+
+  async findSessionState(userId: string): Promise<UserSessionState | null> {
+    return prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        active: true,
+        sessionVersion: true,
+      },
+    });
+  }
+
+  async revokeSessions(userId: string): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        sessionVersion: {
+          increment: 1,
+        },
+      },
+    });
   }
 
   async create(input: PersistUserInput): Promise<void> {

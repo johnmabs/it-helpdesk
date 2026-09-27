@@ -70,6 +70,7 @@ describe("InMemoryUserRepository", () => {
       passwordHash: PASSWORD_HASH,
       role: user.role,
       active: user.active,
+      sessionVersion: 0,
     });
   });
 
@@ -81,6 +82,51 @@ describe("InMemoryUserRepository", () => {
     );
 
     expect(authUser).toBeNull();
+  });
+
+  it("returns the session state for an existing user", async () => {
+    const repository = new InMemoryUserRepository();
+    const user = makeUser();
+
+    await repository.create({ user, passwordHash: PASSWORD_HASH });
+
+    await expect(repository.findSessionState(user.id)).resolves.toEqual({
+      active: true,
+      sessionVersion: 0,
+    });
+  });
+
+  it("returns null when the session user does not exist", async () => {
+    const repository = new InMemoryUserRepository();
+
+    await expect(repository.findSessionState("unknown-id")).resolves.toBeNull();
+  });
+
+  it("increments the session version when sessions are revoked", async () => {
+    const repository = new InMemoryUserRepository();
+    const user = makeUser();
+
+    await repository.create({ user, passwordHash: PASSWORD_HASH });
+
+    await repository.revokeSessions(user.id);
+    await repository.revokeSessions(user.id);
+
+    await expect(repository.findSessionState(user.id)).resolves.toEqual({
+      active: true,
+      sessionVersion: 2,
+    });
+
+    await expect(
+      repository.findForAuthentication(user.email),
+    ).resolves.toMatchObject({ sessionVersion: 2 });
+  });
+
+  it("throws when revoking sessions for an unknown user", async () => {
+    const repository = new InMemoryUserRepository();
+
+    await expect(repository.revokeSessions("unknown-id")).rejects.toThrow(
+      "User not found",
+    );
   });
 
   it("updates an existing user via save, keeping the password hash", async () => {

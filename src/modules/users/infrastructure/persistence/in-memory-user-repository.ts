@@ -2,15 +2,43 @@ import {
   AuthenticationUser,
   PersistUserInput,
   UserRepository,
+  UserSessionState,
 } from "../../domain/user-repository";
 import { User } from "../../domain/user";
 
 type StoredUser = {
   user: User;
   passwordHash: string;
+  sessionVersion: number;
 };
 
 export class InMemoryUserRepository implements UserRepository {
+  async findSessionState(userId: string): Promise<UserSessionState | null> {
+    const stored = this.users.get(userId);
+
+    if (!stored) {
+      return null;
+    }
+
+    return {
+      active: stored.user.active,
+      sessionVersion: stored.sessionVersion,
+    };
+  }
+
+  async revokeSessions(userId: string): Promise<void> {
+    const stored = this.users.get(userId);
+
+    if (!stored) {
+      throw new Error("User not found");
+    }
+
+    this.users.set(userId, {
+      ...stored,
+      sessionVersion: stored.sessionVersion + 1,
+    });
+  }
+
   private readonly users = new Map<string, StoredUser>();
 
   async findById(id: string): Promise<User | null> {
@@ -42,6 +70,7 @@ export class InMemoryUserRepository implements UserRepository {
           passwordHash: stored.passwordHash,
           role: stored.user.role,
           active: stored.user.active,
+          sessionVersion: stored.sessionVersion,
         };
       }
     }
@@ -53,6 +82,7 @@ export class InMemoryUserRepository implements UserRepository {
     this.users.set(input.user.id, {
       user: input.user,
       passwordHash: input.passwordHash,
+      sessionVersion: 0,
     });
   }
 

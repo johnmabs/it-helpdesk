@@ -1,4 +1,5 @@
 import { UserRepository } from "@/modules/users/domain/user-repository";
+import { UserRole } from "@/modules/users/domain/user-role";
 
 import { PasswordHasher } from "../domain/password-hasher";
 
@@ -10,7 +11,8 @@ export type LoginUserInput = {
 export type LoginUserOutput = {
   userId: string;
   email: string;
-  role: string;
+  role: UserRole;
+  sessionVersion: number;
 };
 
 export class LoginUser {
@@ -43,6 +45,7 @@ export class LoginUser {
       userId: user.id,
       email: user.email,
       role: user.role,
+      sessionVersion: user.sessionVersion,
     };
   }
 }
