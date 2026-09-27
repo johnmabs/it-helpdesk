@@ -33,7 +33,7 @@ describe("LoginUser", () => {
     });
   });
 
-  it("authenticates a valid user", async () => {
+  it("valid credentials authenticate", async () => {
     const result = await loginUser.execute({
       email: "john@example.com",
       password: "password123",
@@ -47,7 +47,7 @@ describe("LoginUser", () => {
     });
   });
 
-  it("rejects an invalid password", async () => {
+  it("wrong password fails", async () => {
     await expect(
       loginUser.execute({
         email: "john@example.com",
@@ -56,7 +56,7 @@ describe("LoginUser", () => {
     ).rejects.toThrow("Invalid credentials");
   });
 
-  it("rejects an unknown user", async () => {
+  it("unknown user fails", async () => {
     await expect(
       loginUser.execute({
         email: "unknown@example.com",
@@ -65,7 +65,7 @@ describe("LoginUser", () => {
     ).rejects.toThrow("Invalid credentials");
   });
 
-  it("rejects an inactive user", async () => {
+  it("inactive user fails", async () => {
     const user = await users.findById("user-1");
 
     user!.deactivate();
