@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint --fix",
+    "db:seed": "prisma db seed --config prisma7.config.ts",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run",
     "test:watch": "vitest",
