@@ -47,48 +47,8 @@ export class Ticket {
     });
   }
 
-  get id(): string {
-    return this.props.id;
-  }
-
-  get title(): string {
-    return this.props.title;
-  }
-
-  get description(): string {
-    return this.props.description;
-  }
-
-  get status(): TicketStatus {
-    return this.props.status;
-  }
-
-  get priority(): TicketPriority {
-    return this.props.priority;
-  }
-
-  get createdById(): string {
-    return this.props.createdById;
-  }
-
-  get assignedToId(): string | null {
-    return this.props.assignedToId;
-  }
-
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
-
-  get updatedAt(): Date {
-    return this.props.updatedAt;
-  }
-
-  get resolvedAt(): Date | null {
-    return this.props.resolvedAt;
-  }
-
-  get closedAt(): Date | null {
-    return this.props.closedAt;
+  static restore(props: TicketProps): Ticket {
+    return new Ticket(props);
   }
 
   assignTo(technicianId: string, now: Date): void {
@@ -152,5 +112,49 @@ export class Ticket {
 
     this.props.priority = priority;
     this.props.updatedAt = now;
+  }
+
+  get id(): string {
+    return this.props.id;
+  }
+
+  get title(): string {
+    return this.props.title;
+  }
+
+  get description(): string {
+    return this.props.description;
+  }
+
+  get status(): TicketStatus {
+    return this.props.status;
+  }
+
+  get priority(): TicketPriority {
+    return this.props.priority;
+  }
+
+  get createdById(): string {
+    return this.props.createdById;
+  }
+
+  get assignedToId(): string | null {
+    return this.props.assignedToId;
+  }
+
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+
+  get resolvedAt(): Date | null {
+    return this.props.resolvedAt;
+  }
+
+  get closedAt(): Date | null {
+    return this.props.closedAt;
   }
 }
