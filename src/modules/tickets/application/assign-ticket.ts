@@ -28,14 +28,14 @@ export class AssignTicket {
     }
 
     if (!technician.active) {
-      throw new Error("User is inactive");
+      throw new Error("Inactive user cannot receive tickets");
     }
 
     if (
       technician.role !== UserRole.TECHNICIAN &&
       technician.role !== UserRole.ADMIN
     ) {
-      throw new Error("User is not assignable");
+      throw new Error("Ticket can only be assigned to a technician");
     }
 
     ticket.assignTo(input.technicianId, new Date());
