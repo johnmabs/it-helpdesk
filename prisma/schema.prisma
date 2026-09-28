@@ -13,6 +13,22 @@ enum UserRole {
   ADMIN
 }
 
+enum TicketStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -24,5 +40,31 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  createdTickets  Ticket[] @relation("CreatedTickets")
+  assignedTickets Ticket[] @relation("AssignedTickets")
+
   sessionVersion Int @default(0)
+}
+
+model Ticket {
+  id           String         @id
+  title        String
+  description  String
+  status       TicketStatus   @default(OPEN)
+  priority     TicketPriority
+  createdById  String
+  assignedToId String?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  resolvedAt DateTime?
+  closedAt   DateTime?
+
+  createdBy  User  @relation("CreatedTickets", fields: [createdById], references: [id])
+  assignedTo User? @relation("AssignedTickets", fields: [assignedToId], references: [id])
+
+  @@index([status])
+  @@index([priority])
+  @@index([createdById])
+  @@index([assignedToId])
 }
