@@ -68,7 +68,7 @@ describe("AssignTicket", () => {
         ticketId: "ticket-1",
         technicianId: "assignee-1",
       }),
-    ).rejects.toThrow("User is inactive");
+    ).rejects.toThrow("Inactive user cannot receive tickets");
 
     await expectTicketToRemainOpen();
   });
@@ -81,7 +81,7 @@ describe("AssignTicket", () => {
         ticketId: "ticket-1",
         technicianId: "assignee-1",
       }),
-    ).rejects.toThrow("User is not assignable");
+    ).rejects.toThrow("Ticket can only be assigned to a technician");
 
     await expectTicketToRemainOpen();
   });
