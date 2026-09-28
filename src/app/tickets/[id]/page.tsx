@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
+import { canAssignTicket } from "@/modules/auth/domain/permissions";
 import { getTicketDetails } from "@/modules/tickets/application/get-ticket-details";
+import { listAssignableUsers } from "@/modules/users/application/list-assignable-users";
 
 import { TicketActions } from "./ticket-actions";
 
@@ -21,6 +23,10 @@ export default async function TicketPage({ params }: PageProps) {
   if (!ticket) {
     notFound();
   }
+
+  const assignableUsers = canAssignTicket(user.role)
+    ? await listAssignableUsers()
+    : [];
 
   return (
     <main>
@@ -60,6 +66,7 @@ export default async function TicketPage({ params }: PageProps) {
         ticketId={ticket.id}
         status={ticket.status}
         role={user.role}
+        assignableUsers={assignableUsers}
       />
     </main>
   );

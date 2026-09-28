@@ -11,9 +11,20 @@ type TicketActionsProps = {
   ticketId: string;
   status: string;
   role: UserRole;
+  assignableUsers: Array<{
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  }>;
 };
 
-export function TicketActions({ ticketId, status, role }: TicketActionsProps) {
+export function TicketActions({
+  ticketId,
+  status,
+  role,
+  assignableUsers,
+}: TicketActionsProps) {
   const canManage = role === UserRole.ADMIN || role === UserRole.TECHNICIAN;
 
   if (!canManage) {
@@ -28,14 +39,28 @@ export function TicketActions({ ticketId, status, role }: TicketActionsProps) {
         <form action={assignTicketAction}>
           <input type="hidden" name="ticketId" value={ticketId} />
 
-          <input
-            type="text"
-            name="technicianId"
-            placeholder="ID technicien"
-            required
-          />
+          <label htmlFor="technicianId">Technicien</label>
 
-          <button type="submit">Assigner</button>
+          <select
+            id="technicianId"
+            name="technicianId"
+            defaultValue=""
+            required
+          >
+            <option value="" disabled>
+              Sélectionner un utilisateur
+            </option>
+
+            {assignableUsers.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name} ({user.email}) · {user.role}
+              </option>
+            ))}
+          </select>
+
+          <button type="submit" disabled={assignableUsers.length === 0}>
+            Assigner
+          </button>
         </form>
       ) : null}
 
