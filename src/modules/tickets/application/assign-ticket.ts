@@ -24,7 +24,7 @@ export class AssignTicket {
     const technician = await this.users.findById(input.technicianId);
 
     if (!technician) {
-      throw new Error("User not found");
+      throw new Error("Technician not found");
     }
 
     if (!technician.active) {

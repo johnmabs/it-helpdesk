@@ -55,7 +55,7 @@ describe("AssignTicket", () => {
         ticketId: "ticket-1",
         technicianId: "unknown-user",
       }),
-    ).rejects.toThrow("User not found");
+    ).rejects.toThrow("Technician not found");
 
     await expectTicketToRemainOpen();
   });
