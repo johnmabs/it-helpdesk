@@ -1,4 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+import { config as loadEnvironment } from "dotenv";
+
+loadEnvironment({ quiet: true });
 
 export default defineConfig({
   testDir: "./e2e",
