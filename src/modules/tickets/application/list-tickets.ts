@@ -8,6 +8,7 @@ export type TicketListItem = {
   createdAt: Date;
   createdByName: string;
   assignedToName: string | null;
+  categoryName: string | null;
 };
 
 export async function listTickets(): Promise<TicketListItem[]> {
@@ -26,6 +27,11 @@ export async function listTickets(): Promise<TicketListItem[]> {
           name: true,
         },
       },
+      category: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 
@@ -37,5 +43,6 @@ export async function listTickets(): Promise<TicketListItem[]> {
     createdAt: ticket.createdAt,
     createdByName: ticket.createdBy.name,
     assignedToName: ticket.assignedTo?.name ?? null,
+    categoryName: ticket.category?.name ?? null,
   }));
 }

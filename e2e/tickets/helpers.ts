@@ -26,11 +26,19 @@ export async function createTicket(
   title: string,
   priority = "HIGH",
 ): Promise<void> {
+  const categoryName = `Category ${title}`;
+
+  await page.goto("/admin/categories");
+  await page.getByLabel("Nom").first().fill(categoryName);
+  await page.getByRole("button", { name: "Créer la catégorie" }).click();
+  await expect(page.getByRole("status")).toHaveText("Catégorie créée.");
+
   await page.goto("/dashboard/tickets/new");
   await page.getByLabel("Titre").fill(title);
   await page
     .getByLabel("Description")
     .fill("Description créée par le scénario de test de bout en bout.");
+  await page.getByLabel("Catégorie").selectOption({ label: categoryName });
   await page.getByLabel("Priorité").selectOption(priority);
   await page.getByRole("button", { name: "Créer le ticket" }).click();
 

@@ -27,6 +27,13 @@ vi.mock(
   }),
 );
 
+vi.mock(
+  "@/modules/categories/infrastructure/persistence/prisma-category-repository",
+  () => ({
+    PrismaCategoryRepository: class {},
+  }),
+);
+
 vi.mock("@/shared/identity/random-id-generator", () => ({
   RandomIdGenerator: class {},
 }));
@@ -38,6 +45,7 @@ function validFormData(): FormData {
   formData.set("title", "Écran cassé");
   formData.set("description", "L'écran du poste ne s'allume plus.");
   formData.set("priority", "HIGH");
+  formData.set("categoryId", "category-1");
 
   return formData;
 }
@@ -62,6 +70,9 @@ describe("createTicketAction", () => {
     expect(mocks.redirect).toHaveBeenCalledWith(
       "/dashboard/tickets/ticket-1",
     );
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ categoryId: "category-1" }),
+    );
   });
 
   it("retourne une erreur lorsque la création échoue", async () => {
@@ -70,6 +81,17 @@ describe("createTicketAction", () => {
     await expect(
       createTicketAction({ error: "" }, validFormData()),
     ).resolves.toEqual({ error: "Impossible de créer le ticket." });
+    expect(mocks.redirect).not.toHaveBeenCalled();
+  });
+
+  it("retourne une erreur lorsque la catégorie est inactive", async () => {
+    mocks.execute.mockRejectedValue(new Error("Category is inactive"));
+
+    await expect(
+      createTicketAction({ error: "" }, validFormData()),
+    ).resolves.toEqual({
+      error: "La catégorie sélectionnée n'est plus disponible.",
+    });
     expect(mocks.redirect).not.toHaveBeenCalled();
   });
 });

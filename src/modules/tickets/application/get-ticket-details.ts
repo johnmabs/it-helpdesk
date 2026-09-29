@@ -11,6 +11,11 @@ export type TicketDetails = {
   resolvedAt: Date | null;
   closedAt: Date | null;
 
+  category: {
+    id: string;
+    name: string;
+  } | null;
+
   createdBy: {
     id: string;
     name: string;
@@ -41,6 +46,13 @@ export async function getTicketDetails(
       updatedAt: true,
       resolvedAt: true,
       closedAt: true,
+
+      category: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
 
       createdBy: {
         select: {

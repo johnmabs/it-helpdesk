@@ -2,13 +2,19 @@
 
 import { useActionState } from "react";
 
+import type { CategoryOutput } from "@/modules/categories/application/category-output";
+
 import { createTicketAction } from "./actions";
 
 const initialState = {
   error: "",
 };
 
-export function CreateTicketForm() {
+export function CreateTicketForm({
+  categories,
+}: {
+  categories: CategoryOutput[];
+}) {
   const [state, action, pending] = useActionState(
     createTicketAction,
     initialState,
@@ -29,6 +35,35 @@ export function CreateTicketForm() {
       </div>
 
       <div>
+        <label htmlFor="categoryId">Catégorie</label>
+
+        <select
+          id="categoryId"
+          name="categoryId"
+          defaultValue=""
+          required
+          disabled={categories.length === 0}
+        >
+          <option value="" disabled>
+            Sélectionner une catégorie
+          </option>
+
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {categories.length === 0 ? (
+        <p role="alert">
+          Aucune catégorie active. Contactez un administrateur avant de créer
+          un ticket.
+        </p>
+      ) : null}
+
+      <div>
         <label htmlFor="priority">Priorité</label>
 
         <select id="priority" name="priority" defaultValue="MEDIUM">
@@ -44,7 +79,7 @@ export function CreateTicketForm() {
 
       {state.error ? <p role="alert">{state.error}</p> : null}
 
-      <button type="submit" disabled={pending}>
+      <button type="submit" disabled={pending || categories.length === 0}>
         {pending ? "Création..." : "Créer le ticket"}
       </button>
     </form>

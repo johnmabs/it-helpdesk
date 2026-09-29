@@ -27,6 +27,7 @@ describe("AssignTicket", () => {
         description: "The office printer cannot be reached",
         priority: TicketPriority.MEDIUM,
         createdById: "requester-1",
+        categoryId: "category-1",
         createdAt: new Date("2026-09-28T08:00:00Z"),
       }),
     );

@@ -1,27 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { FixedIdGenerator } from "@/shared/identity/fixed-id-generator";
-
+import { Ticket } from "../domain/ticket";
 import { TicketPriority } from "../domain/ticket-priority";
 import { TicketStatus } from "../domain/ticket-status";
 import { InMemoryTicketRepository } from "../infrastructure/persistence/in-memory-ticket-repository";
-import { CreateTicket } from "./create-ticket";
 import { StartTicket } from "./start-ticket";
 
 describe("StartTicket", () => {
   it("starts an assigned ticket", async () => {
     const tickets = new InMemoryTicketRepository();
-    const createTicket = new CreateTicket(
-      tickets,
-      new FixedIdGenerator("ticket-1"),
-    );
-
-    await createTicket.execute({
-      title: "Printer unavailable",
-      description: "Printer does not respond",
-      priority: TicketPriority.MEDIUM,
-      createdById: "user-1",
-    });
+    await tickets.save(makeTicket());
 
     const ticket = await tickets.findById("ticket-1");
     ticket!.assignTo("tech-1", new Date());
@@ -42,3 +30,15 @@ describe("StartTicket", () => {
     );
   });
 });
+
+function makeTicket(): Ticket {
+  return Ticket.create({
+    id: "ticket-1",
+    title: "Printer unavailable",
+    description: "Printer does not respond",
+    priority: TicketPriority.MEDIUM,
+    createdById: "user-1",
+    categoryId: "category-1",
+    createdAt: new Date("2026-09-29T08:00:00Z"),
+  });
+}

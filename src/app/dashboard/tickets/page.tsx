@@ -24,6 +24,7 @@ export default async function TicketsPage() {
             <tr>
               <th>Titre</th>
               <th>Priorité</th>
+              <th>Catégorie</th>
               <th>Statut</th>
               <th>Créé par</th>
               <th>Assigné à</th>
@@ -41,6 +42,7 @@ export default async function TicketsPage() {
                 </td>
 
                 <td>{ticket.priority}</td>
+                <td>{ticket.categoryName ?? "Non classé"}</td>
                 <td>{ticket.status}</td>
                 <td>{ticket.createdByName}</td>
 

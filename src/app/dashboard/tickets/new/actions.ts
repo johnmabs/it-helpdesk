@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { PrismaCategoryRepository } from "@/modules/categories/infrastructure/persistence/prisma-category-repository";
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import { CreateTicket } from "@/modules/tickets/application/create-ticket";
 import { TicketPriority } from "@/modules/tickets/domain/ticket-priority";
@@ -21,11 +22,14 @@ export async function createTicketAction(
   const title = formData.get("title");
   const description = formData.get("description");
   const priority = formData.get("priority");
+  const categoryId = formData.get("categoryId");
 
   if (
     typeof title !== "string" ||
     typeof description !== "string" ||
-    typeof priority !== "string"
+    typeof priority !== "string" ||
+    typeof categoryId !== "string" ||
+    !categoryId.trim()
   ) {
     return {
       error: "Données invalides.",
@@ -41,6 +45,7 @@ export async function createTicketAction(
   const createTicket = new CreateTicket(
     new PrismaTicketRepository(),
     new RandomIdGenerator(),
+    new PrismaCategoryRepository(),
   );
 
   let result;
@@ -51,8 +56,19 @@ export async function createTicketAction(
       description,
       priority: priority as TicketPriority,
       createdById: user.id,
+      categoryId,
     });
-  } catch {
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "Category not found" ||
+        error.message === "Category is inactive")
+    ) {
+      return {
+        error: "La catégorie sélectionnée n'est plus disponible.",
+      };
+    }
+
     return {
       error: "Impossible de créer le ticket.",
     };

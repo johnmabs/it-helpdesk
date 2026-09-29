@@ -11,6 +11,7 @@ function makeTicket() {
     description: "No network access",
     priority: TicketPriority.HIGH,
     createdById: "user-1",
+    categoryId: "category-1",
     createdAt: new Date("2026-01-01T08:00:00Z"),
   });
 }
@@ -21,6 +22,21 @@ describe("Ticket", () => {
 
     expect(ticket.status).toBe(TicketStatus.OPEN);
     expect(ticket.assignedToId).toBeNull();
+    expect(ticket.categoryId).toBe("category-1");
+  });
+
+  it("rejects an empty category", () => {
+    expect(() =>
+      Ticket.create({
+        id: "ticket-1",
+        title: "Internet unavailable",
+        description: "No network access",
+        priority: TicketPriority.HIGH,
+        createdById: "user-1",
+        categoryId: "   ",
+        createdAt: new Date("2026-01-01T08:00:00Z"),
+      }),
+    ).toThrow("Ticket category is required");
   });
 
   it("assigns an open ticket", () => {

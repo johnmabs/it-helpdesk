@@ -54,6 +54,9 @@ export default async function TicketPage({ params }: PageProps) {
           <dt>Assigné à</dt>
           <dd>{ticket.assignedTo?.name ?? "Non assigné"}</dd>
 
+          <dt>Catégorie</dt>
+          <dd>{ticket.category?.name ?? "Non classé"}</dd>
+
           <dt>Créé le</dt>
           <dd>{ticket.createdAt.toLocaleString("fr-FR")}</dd>
 

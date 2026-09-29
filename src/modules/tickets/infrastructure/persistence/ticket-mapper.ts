@@ -18,6 +18,7 @@ export class TicketMapper {
       priority: this.toDomainPriority(raw.priority),
       createdById: raw.createdById,
       assignedToId: raw.assignedToId,
+      categoryId: raw.categoryId,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
       resolvedAt: raw.resolvedAt,

@@ -9,6 +9,7 @@ export type TicketProps = {
   priority: TicketPriority;
   createdById: string;
   assignedToId: string | null;
+  categoryId: string | null;
   createdAt: Date;
   updatedAt: Date;
   resolvedAt: Date | null;
@@ -21,11 +22,17 @@ export class Ticket {
   static create(
     props: Omit<
       TicketProps,
-      "status" | "assignedToId" | "updatedAt" | "resolvedAt" | "closedAt"
-    >,
+      | "status"
+      | "assignedToId"
+      | "categoryId"
+      | "updatedAt"
+      | "resolvedAt"
+      | "closedAt"
+    > & { categoryId: string },
   ): Ticket {
     const title = props.title.trim();
     const description = props.description.trim();
+    const categoryId = props.categoryId.trim();
 
     if (!title) {
       throw new Error("Ticket title is required");
@@ -35,12 +42,17 @@ export class Ticket {
       throw new Error("Ticket description is required");
     }
 
+    if (!categoryId) {
+      throw new Error("Ticket category is required");
+    }
+
     return new Ticket({
       ...props,
       title,
       description,
       status: TicketStatus.OPEN,
       assignedToId: null,
+      categoryId,
       updatedAt: props.createdAt,
       resolvedAt: null,
       closedAt: null,
@@ -140,6 +152,10 @@ export class Ticket {
 
   get assignedToId(): string | null {
     return this.props.assignedToId;
+  }
+
+  get categoryId(): string | null {
+    return this.props.categoryId;
   }
 
   get createdAt(): Date {
