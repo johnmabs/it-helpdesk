@@ -51,7 +51,7 @@ export async function createTicketAction(
       createdById: user.id,
     });
 
-    redirect(`/tickets/${result.id}`);
+    redirect(`/dashboard/tickets/${result.id}`);
   } catch {
     return {
       error: "Impossible de créer le ticket.",

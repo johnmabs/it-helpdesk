@@ -41,7 +41,7 @@ export async function assignTicketAction(formData: FormData) {
     technicianId,
   });
 
-  revalidatePath(`/tickets/${ticketId}`);
+  revalidatePath(`/dashboard/tickets/${ticketId}`);
 }
 
 export async function startTicketAction(formData: FormData) {
@@ -53,7 +53,7 @@ export async function startTicketAction(formData: FormData) {
 
   await useCase.execute(ticketId);
 
-  revalidatePath(`/tickets/${ticketId}`);
+  revalidatePath(`/dashboard/tickets/${ticketId}`);
 }
 
 export async function resolveTicketAction(formData: FormData) {
@@ -65,7 +65,7 @@ export async function resolveTicketAction(formData: FormData) {
 
   await useCase.execute(ticketId);
 
-  revalidatePath(`/tickets/${ticketId}`);
+  revalidatePath(`/dashboard/tickets/${ticketId}`);
 }
 
 export async function closeTicketAction(formData: FormData) {
@@ -77,5 +77,5 @@ export async function closeTicketAction(formData: FormData) {
 
   await useCase.execute(ticketId);
 
-  revalidatePath(`/tickets/${ticketId}`);
+  revalidatePath(`/dashboard/tickets/${ticketId}`);
 }

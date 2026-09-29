@@ -13,7 +13,7 @@ export default async function TicketsPage() {
       <div>
         <h1>Tickets</h1>
 
-        <Link href="/tickets/new">Nouveau ticket</Link>
+        <Link href="/dashboard/tickets/new">Nouveau ticket</Link>
       </div>
 
       {tickets.length === 0 ? (
@@ -35,7 +35,9 @@ export default async function TicketsPage() {
             {tickets.map((ticket) => (
               <tr key={ticket.id}>
                 <td>
-                  <Link href={`/tickets/${ticket.id}`}>{ticket.title}</Link>
+                  <Link href={`/dashboard/tickets/${ticket.id}`}>
+                    {ticket.title}
+                  </Link>
                 </td>
 
                 <td>{ticket.priority}</td>
