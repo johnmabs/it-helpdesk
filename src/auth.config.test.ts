@@ -13,4 +13,15 @@ describe("authentication route protection", () => {
 
     expect(authorized).toBe(false);
   });
+
+  it("anonymous user cannot access administration pages", () => {
+    const authorized = authConfig.callbacks.authorized({
+      auth: null,
+      request: {
+        nextUrl: new URL("http://localhost/admin/categories"),
+      },
+    } as never);
+
+    expect(authorized).toBe(false);
+  });
 });
