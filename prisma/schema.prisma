@@ -46,6 +46,16 @@ model User {
   sessionVersion Int @default(0)
 }
 
+model Category {
+  id          String   @id
+  name        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tickets Ticket[]
+}
+
 model Ticket {
   id           String         @id
   title        String
@@ -54,17 +64,20 @@ model Ticket {
   priority     TicketPriority
   createdById  String
   assignedToId String?
+  categoryId   String?
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   resolvedAt DateTime?
   closedAt   DateTime?
 
-  createdBy  User  @relation("CreatedTickets", fields: [createdById], references: [id])
-  assignedTo User? @relation("AssignedTickets", fields: [assignedToId], references: [id])
+  createdBy  User      @relation("CreatedTickets", fields: [createdById], references: [id])
+  assignedTo User?     @relation("AssignedTickets", fields: [assignedToId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   @@index([status])
   @@index([priority])
   @@index([createdById])
   @@index([assignedToId])
+  @@index([categoryId])
 }
