@@ -43,18 +43,20 @@ export async function createTicketAction(
     new RandomIdGenerator(),
   );
 
+  let result;
+
   try {
-    const result = await createTicket.execute({
+    result = await createTicket.execute({
       title,
       description,
       priority: priority as TicketPriority,
       createdById: user.id,
     });
-
-    redirect(`/dashboard/tickets/${result.id}`);
   } catch {
     return {
       error: "Impossible de créer le ticket.",
     };
   }
+
+  redirect(`/dashboard/tickets/${result.id}`);
 }
