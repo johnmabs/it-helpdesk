@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import { getTechnicianWorkload } from "@/modules/tickets/application/get-technician-workload";
+import { getTicketCategoryMetrics } from "@/modules/tickets/application/get-ticket-category-metrics";
 import { getTicketSummaryMetrics } from "@/modules/tickets/application/get-ticket-summary-metrics";
 import { listRecentTickets } from "@/modules/tickets/application/list-recent-tickets";
 import { UserRole } from "@/modules/users/domain/user-role";
@@ -11,13 +12,15 @@ import { TechnicianWorkloadView } from "./technician-workload";
 
 export default async function DashboardPage() {
   const user = await requireAuthenticatedUser();
-  const [metrics, recentTickets, technicianWorkload] = await Promise.all([
-    getTicketSummaryMetrics(user),
-    listRecentTickets(user),
-    user.role === UserRole.TECHNICIAN
-      ? getTechnicianWorkload(user.id)
-      : Promise.resolve(null),
-  ]);
+  const [metrics, categoryMetrics, recentTickets, technicianWorkload] =
+    await Promise.all([
+      getTicketSummaryMetrics(user),
+      getTicketCategoryMetrics(user),
+      listRecentTickets(user),
+      user.role === UserRole.TECHNICIAN
+        ? getTechnicianWorkload(user.id)
+        : Promise.resolve(null),
+    ]);
 
   const summary = [
     { label: "Tickets ouverts", value: metrics.open },
@@ -45,6 +48,27 @@ export default async function DashboardPage() {
             </div>
           ))}
         </dl>
+      </section>
+
+      <section aria-labelledby="category-metrics-heading">
+        <h2 id="category-metrics-heading">Tickets par catégorie</h2>
+
+        {categoryMetrics.length === 0 ? (
+          <p>Aucune catégorie configurée.</p>
+        ) : (
+          <dl>
+            {categoryMetrics.map((metric) => (
+              <div key={metric.id}>
+                <dt>
+                  <Link href={`/dashboard/tickets?category=${metric.id}`}>
+                    {metric.name}
+                  </Link>
+                </dt>
+                <dd>{metric.ticketCount}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </section>
 
       <section aria-labelledby="recent-tickets-heading">
