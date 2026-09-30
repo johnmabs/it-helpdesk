@@ -27,6 +27,17 @@ export type TicketDetails = {
     name: string;
     email: string;
   } | null;
+
+  comments: Array<{
+    id: string;
+    body: string;
+    createdAt: Date;
+    updatedAt: Date | null;
+    author: {
+      id: string;
+      name: string;
+    };
+  }>;
 };
 
 export async function getTicketDetails(
@@ -68,6 +79,22 @@ export async function getTicketDetails(
           name: true,
           email: true,
         },
+      },
+
+      comments: {
+        select: {
+          id: true,
+          body: true,
+          createdAt: true,
+          updatedAt: true,
+          author: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
       },
     },
   });

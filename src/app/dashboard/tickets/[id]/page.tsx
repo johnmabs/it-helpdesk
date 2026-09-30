@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
 
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
-import { canAssignTicket } from "@/modules/auth/domain/permissions";
+import {
+  canAssignTicket,
+  canViewTicket,
+} from "@/modules/auth/domain/permissions";
 import { getTicketDetails } from "@/modules/tickets/application/get-ticket-details";
 import { listAssignableUsers } from "@/modules/users/application/list-assignable-users";
 
+import { AddTicketCommentForm } from "./add-ticket-comment-form";
 import { TicketActions } from "./ticket-actions";
 
 type PageProps = {
@@ -20,7 +24,10 @@ export default async function TicketPage({ params }: PageProps) {
 
   const ticket = await getTicketDetails(id);
 
-  if (!ticket) {
+  if (
+    !ticket ||
+    !canViewTicket(user, { createdById: ticket.createdBy.id })
+  ) {
     notFound();
   }
 
@@ -71,6 +78,33 @@ export default async function TicketPage({ params }: PageProps) {
         role={user.role}
         assignableUsers={assignableUsers}
       />
+
+      <section>
+        <h2>Commentaires</h2>
+
+        {ticket.comments.length === 0 ? (
+          <p>Aucun commentaire pour le moment.</p>
+        ) : (
+          <ol aria-label="Commentaires du ticket">
+            {ticket.comments.map((comment) => (
+              <li key={comment.id}>
+                <article>
+                  <header>
+                    <strong>{comment.author.name}</strong>{" "}
+                    <time dateTime={comment.createdAt.toISOString()}>
+                      {comment.createdAt.toLocaleString("fr-FR")}
+                    </time>
+                  </header>
+
+                  <p>{comment.body}</p>
+                </article>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        <AddTicketCommentForm ticketId={ticket.id} />
+      </section>
     </main>
   );
 }
