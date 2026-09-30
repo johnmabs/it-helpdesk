@@ -19,6 +19,9 @@ test("authenticates and signs out an administrator", async ({ page }) => {
   await loginAsAdmin(page);
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 
+  await page
+    .getByLabel(`Menu utilisateur, ${E2E_USERS.admin.email}`)
+    .click();
   await page.getByRole("button", { name: "Se déconnecter" }).click();
 
   await expect(page).toHaveURL(/\/login$/);

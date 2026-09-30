@@ -7,7 +7,6 @@ import { getTicketSummaryMetrics } from "@/modules/tickets/application/get-ticke
 import { listRecentTickets } from "@/modules/tickets/application/list-recent-tickets";
 import { UserRole } from "@/modules/users/domain/user-role";
 
-import { logoutAction } from "./actions";
 import { TechnicianWorkloadView } from "./technician-workload";
 
 export default async function DashboardPage() {
@@ -33,9 +32,6 @@ export default async function DashboardPage() {
   return (
     <main>
       <h1>Dashboard</h1>
-
-      <p>{user.email}</p>
-      <p>{user.role}</p>
 
       <section aria-labelledby="ticket-summary-heading">
         <h2 id="ticket-summary-heading">Activité des tickets</h2>
@@ -120,9 +116,6 @@ export default async function DashboardPage() {
         <TechnicianWorkloadView workload={technicianWorkload} />
       ) : null}
 
-      <form action={logoutAction}>
-        <button type="submit">Se déconnecter</button>
-      </form>
     </main>
   );
 }
