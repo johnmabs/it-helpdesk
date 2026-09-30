@@ -9,8 +9,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix",
     "db:seed": "prisma db seed --config prisma7.config.ts",
+    "db:test:up": "docker compose --profile test up -d --wait postgres-test",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e"

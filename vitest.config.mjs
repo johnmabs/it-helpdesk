@@ -7,6 +7,10 @@ export default defineConfig({
     },
   },
   test: {
-    exclude: [...configDefaults.exclude, "./e2e"],
+    exclude: [
+      ...configDefaults.exclude,
+      "./e2e",
+      "./src/**/*.integration.test.ts",
+    ],
   },
 });
