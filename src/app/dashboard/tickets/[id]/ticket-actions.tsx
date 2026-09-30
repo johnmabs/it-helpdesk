@@ -1,7 +1,9 @@
+import { TicketPriority } from "@/modules/tickets/domain/ticket-priority";
 import { UserRole } from "@/modules/users/domain/user-role";
 
 import {
   assignTicketAction,
+  changeTicketPriorityAction,
   closeTicketAction,
   resolveTicketAction,
   startTicketAction,
@@ -10,6 +12,7 @@ import {
 type TicketActionsProps = {
   ticketId: string;
   status: string;
+  priority: string;
   role: UserRole;
   assignableUsers: Array<{
     id: string;
@@ -22,6 +25,7 @@ type TicketActionsProps = {
 export function TicketActions({
   ticketId,
   status,
+  priority,
   role,
   assignableUsers,
 }: TicketActionsProps) {
@@ -34,6 +38,27 @@ export function TicketActions({
   return (
     <section>
       <h2>Actions</h2>
+
+      {status !== "CLOSED" && status !== "CANCELLED" ? (
+        <form action={changeTicketPriorityAction}>
+          <input type="hidden" name="ticketId" value={ticketId} />
+
+          <label htmlFor="ticket-priority">Priorité</label>
+          <select
+            id="ticket-priority"
+            name="priority"
+            defaultValue={priority}
+          >
+            {Object.values(TicketPriority).map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+
+          <button type="submit">Modifier la priorité</button>
+        </form>
+      ) : null}
 
       {status === "OPEN" ? (
         <form action={assignTicketAction}>

@@ -11,6 +11,7 @@ import {
   CategoryNotFoundError,
 } from "@/shared/errors/application-error";
 import { RandomIdGenerator } from "@/shared/identity/random-id-generator";
+import { createCategoryRequestSchema } from "@/shared/validation/request-schemas";
 
 import { requireCategoryAdministrator } from "./require-category-administrator";
 
@@ -27,10 +28,12 @@ export async function createCategoryAction(
 ): Promise<CategoryActionState> {
   await requireCategoryAdministrator();
 
-  const name = readRequiredString(formData, "name");
-  const description = readOptionalString(formData, "description");
+  const request = createCategoryRequestSchema.safeParse({
+    name: formData.get("name"),
+    description: formData.get("description"),
+  });
 
-  if (!name) {
+  if (!request.success) {
     return failure("Le nom de la catégorie est obligatoire.");
   }
 
@@ -38,7 +41,7 @@ export async function createCategoryAction(
     await new CreateCategory(
       new PrismaCategoryRepository(),
       new RandomIdGenerator(),
-    ).execute({ name, description });
+    ).execute(request.data);
 
     revalidatePath(categoriesPath);
 

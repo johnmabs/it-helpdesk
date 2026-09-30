@@ -103,4 +103,14 @@ describe("createTicketAction", () => {
     });
     expect(mocks.redirect).not.toHaveBeenCalled();
   });
+
+  it("rejette une priorité inconnue avant d'appeler le cas d'usage", async () => {
+    const formData = validFormData();
+    formData.set("priority", "URGENT");
+
+    await expect(
+      createTicketAction({ error: "" }, formData),
+    ).resolves.toEqual({ error: "Priorité invalide." });
+    expect(mocks.execute).not.toHaveBeenCalled();
+  });
 });

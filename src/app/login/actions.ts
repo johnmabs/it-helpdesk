@@ -3,6 +3,7 @@
 import { AuthError } from "next-auth";
 
 import { signIn } from "@/auth";
+import { loginRequestSchema } from "@/shared/validation/request-schemas";
 
 export type LoginState = {
   error: string;
@@ -12,10 +13,21 @@ export async function loginAction(
   _previousState: LoginState,
   formData: FormData,
 ): Promise<LoginState> {
+  const request = loginRequestSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!request.success) {
+    return {
+      error: "Email ou mot de passe incorrect.",
+    };
+  }
+
   try {
     await signIn("credentials", {
-      email: formData.get("email"),
-      password: formData.get("password"),
+      email: request.data.email,
+      password: request.data.password,
       redirectTo: "/dashboard",
     });
 

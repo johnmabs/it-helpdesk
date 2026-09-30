@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { UserRole } from "@/modules/users/domain/user-role";
-import { ForbiddenError } from "@/shared/errors/application-error";
+import {
+  ForbiddenError,
+  ValidationError,
+} from "@/shared/errors/application-error";
 
 const mocks = vi.hoisted(() => ({
   assignExecute: vi.fn(),
+  changePriorityExecute: vi.fn(),
   closeExecute: vi.fn(),
   execute: vi.fn(),
   revalidatePath: vi.fn(),
@@ -36,6 +40,12 @@ vi.mock("@/modules/tickets/application/assign-ticket", () => ({
 vi.mock("@/modules/tickets/application/close-ticket", () => ({
   CloseTicket: class {
     execute = mocks.closeExecute;
+  },
+}));
+
+vi.mock("@/modules/tickets/application/change-ticket-priority", () => ({
+  ChangeTicketPriority: class {
+    execute = mocks.changePriorityExecute;
   },
 }));
 
@@ -86,6 +96,7 @@ vi.mock("@/shared/identity/random-id-generator", () => ({
 import {
   addTicketCommentAction,
   assignTicketAction,
+  changeTicketPriorityAction,
   closeTicketAction,
   resolveTicketAction,
   startTicketAction,
@@ -118,7 +129,10 @@ describe("addTicketCommentAction", () => {
     mocks.execute.mockResolvedValue({ id: "comment-1" });
 
     await expect(
-      addTicketCommentAction(initialState, commentFormData()),
+      addTicketCommentAction(
+        initialState,
+        commentFormData("  La pièce est disponible.  "),
+      ),
     ).resolves.toEqual({ error: "", submitted: true });
 
     expect(mocks.execute).toHaveBeenCalledWith({
@@ -201,5 +215,49 @@ describe("ticket workflow actions", () => {
       ticketId: "ticket-1",
       actorId: "actor-1",
     });
+  });
+
+  it("validates and applies a priority change", async () => {
+    const formData = new FormData();
+    formData.set("ticketId", " ticket-1 ");
+    formData.set("priority", "CRITICAL");
+
+    await changeTicketPriorityAction(formData);
+
+    expect(mocks.changePriorityExecute).toHaveBeenCalledWith({
+      ticketId: "ticket-1",
+      priority: "CRITICAL",
+      actorId: "actor-1",
+    });
+    expect(mocks.revalidatePath).toHaveBeenCalledWith(
+      "/dashboard/tickets/ticket-1",
+    );
+  });
+
+  it("rejects an unknown priority before calling the use case", async () => {
+    const formData = new FormData();
+    formData.set("ticketId", "ticket-1");
+    formData.set("priority", "URGENT");
+
+    await expect(changeTicketPriorityAction(formData)).rejects.toBeInstanceOf(
+      ValidationError,
+    );
+    expect(mocks.changePriorityExecute).not.toHaveBeenCalled();
+  });
+
+  it("forbids a standard user from changing a ticket priority", async () => {
+    mocks.requireAuthenticatedUser.mockResolvedValue({
+      id: "requester-1",
+      email: "requester@example.com",
+      role: UserRole.USER,
+    });
+    const formData = new FormData();
+    formData.set("ticketId", "ticket-1");
+    formData.set("priority", "HIGH");
+
+    await expect(changeTicketPriorityAction(formData)).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+    expect(mocks.changePriorityExecute).not.toHaveBeenCalled();
   });
 });

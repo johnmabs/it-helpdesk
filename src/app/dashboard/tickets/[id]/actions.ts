@@ -3,10 +3,12 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
+import { canAssignTicket } from "@/modules/auth/domain/permissions";
 import { AddTicketComment } from "@/modules/comments/application/add-ticket-comment";
 import { PrismaTicketCommentRepository } from "@/modules/comments/infrastructure/persistence/prisma-ticket-comment-repository";
 import { AssignTicket } from "@/modules/tickets/application/assign-ticket";
 import { CloseTicket } from "@/modules/tickets/application/close-ticket";
+import { ChangeTicketPriority } from "@/modules/tickets/application/change-ticket-priority";
 import { ResolveTicket } from "@/modules/tickets/application/resolve-ticket";
 import { StartTicket } from "@/modules/tickets/application/start-ticket";
 import { TicketHistoryRecorder } from "@/modules/tickets/application/ticket-history-recorder";
@@ -19,6 +21,10 @@ import {
   ValidationError,
 } from "@/shared/errors/application-error";
 import { RandomIdGenerator } from "@/shared/identity/random-id-generator";
+import {
+  addTicketCommentRequestSchema,
+  changeTicketPriorityRequestSchema,
+} from "@/shared/validation/request-schemas";
 
 export type AddTicketCommentState = {
   error: string;
@@ -113,20 +119,47 @@ export async function closeTicketAction(formData: FormData) {
   revalidatePath(`/dashboard/tickets/${ticketId}`);
 }
 
+export async function changeTicketPriorityAction(formData: FormData) {
+  const user = await requireAuthenticatedUser();
+
+  if (!canAssignTicket(user.role)) {
+    throw new ForbiddenError("Not allowed to change ticket priority");
+  }
+
+  const request = changeTicketPriorityRequestSchema.safeParse({
+    ticketId: formData.get("ticketId"),
+    priority: formData.get("priority"),
+  });
+
+  if (!request.success) {
+    throw new ValidationError("Invalid ticket priority change");
+  }
+
+  const useCase = new ChangeTicketPriority(
+    new PrismaTicketRepository(),
+    createTicketHistoryRecorder(),
+  );
+
+  await useCase.execute({
+    ticketId: request.data.ticketId,
+    priority: request.data.priority,
+    actorId: user.id,
+  });
+
+  revalidatePath(`/dashboard/tickets/${request.data.ticketId}`);
+}
+
 export async function addTicketCommentAction(
   _previousState: AddTicketCommentState,
   formData: FormData,
 ): Promise<AddTicketCommentState> {
   const user = await requireAuthenticatedUser();
-  const ticketId = formData.get("ticketId");
-  const body = formData.get("body");
+  const request = addTicketCommentRequestSchema.safeParse({
+    ticketId: formData.get("ticketId"),
+    body: formData.get("body"),
+  });
 
-  if (
-    typeof ticketId !== "string" ||
-    !ticketId.trim() ||
-    typeof body !== "string" ||
-    !body.trim()
-  ) {
+  if (!request.success) {
     return {
       error: "Le commentaire ne peut pas être vide.",
       submitted: false,
@@ -142,8 +175,8 @@ export async function addTicketCommentAction(
 
   try {
     await addTicketComment.execute({
-      ticketId,
-      body,
+      ticketId: request.data.ticketId,
+      body: request.data.body,
       authenticatedUser: user,
     });
   } catch (error) {
@@ -167,7 +200,7 @@ export async function addTicketCommentAction(
     };
   }
 
-  revalidatePath(`/dashboard/tickets/${ticketId}`);
+  revalidatePath(`/dashboard/tickets/${request.data.ticketId}`);
 
   return {
     error: "",

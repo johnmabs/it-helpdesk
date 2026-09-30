@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import { LoginUser } from "./modules/auth/application/login-user";
 import { ArgonPasswordHasher } from "./modules/auth/infrastructure/security/argon-password-hasher";
 import { PrismaUserRepository } from "./modules/users/infrastructure/persistence/prisma-user-repository";
+import { loginRequestSchema } from "./shared/validation/request-schemas";
 
 const users = new PrismaUserRepository();
 const passwordHasher = new ArgonPasswordHasher();
@@ -72,18 +73,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       async authorize(credentials) {
-        if (
-          typeof credentials?.email !== "string" ||
-          typeof credentials?.password !== "string"
-        ) {
+        const request = loginRequestSchema.safeParse(credentials);
+
+        if (!request.success) {
           return null;
         }
 
         try {
-          const result = await loginUser.execute({
-            email: credentials.email,
-            password: credentials.password,
-          });
+          const result = await loginUser.execute(request.data);
 
           return {
             id: result.userId,

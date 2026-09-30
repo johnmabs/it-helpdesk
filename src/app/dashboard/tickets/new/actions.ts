@@ -6,7 +6,6 @@ import { PrismaCategoryRepository } from "@/modules/categories/infrastructure/pe
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import { CreateTicket } from "@/modules/tickets/application/create-ticket";
 import { TicketHistoryRecorder } from "@/modules/tickets/application/ticket-history-recorder";
-import { TicketPriority } from "@/modules/tickets/domain/ticket-priority";
 import { PrismaTicketHistoryRepository } from "@/modules/tickets/infrastructure/persistence/prisma-ticket-history-repository";
 import { PrismaTicketRepository } from "@/modules/tickets/infrastructure/persistence/prisma-ticket-repository";
 import {
@@ -14,6 +13,7 @@ import {
   CategoryNotFoundError,
 } from "@/shared/errors/application-error";
 import { RandomIdGenerator } from "@/shared/identity/random-id-generator";
+import { createTicketRequestSchema } from "@/shared/validation/request-schemas";
 
 export type CreateTicketState = {
   error: string;
@@ -25,26 +25,20 @@ export async function createTicketAction(
 ): Promise<CreateTicketState> {
   const user = await requireAuthenticatedUser();
 
-  const title = formData.get("title");
-  const description = formData.get("description");
-  const priority = formData.get("priority");
-  const categoryId = formData.get("categoryId");
+  const request = createTicketRequestSchema.safeParse({
+    title: formData.get("title"),
+    description: formData.get("description"),
+    priority: formData.get("priority"),
+    categoryId: formData.get("categoryId"),
+  });
 
-  if (
-    typeof title !== "string" ||
-    typeof description !== "string" ||
-    typeof priority !== "string" ||
-    typeof categoryId !== "string" ||
-    !categoryId.trim()
-  ) {
-    return {
-      error: "Données invalides.",
-    };
-  }
+  if (!request.success) {
+    const invalidPriority = request.error.issues.some(
+      (issue) => issue.path[0] === "priority",
+    );
 
-  if (!Object.values(TicketPriority).includes(priority as TicketPriority)) {
     return {
-      error: "Priorité invalide.",
+      error: invalidPriority ? "Priorité invalide." : "Données invalides.",
     };
   }
 
@@ -62,11 +56,11 @@ export async function createTicketAction(
 
   try {
     result = await createTicket.execute({
-      title,
-      description,
-      priority: priority as TicketPriority,
+      title: request.data.title,
+      description: request.data.description,
+      priority: request.data.priority,
       createdById: user.id,
-      categoryId,
+      categoryId: request.data.categoryId,
     });
   } catch (error) {
     if (
