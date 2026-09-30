@@ -1,12 +1,30 @@
 import Link from "next/link";
 
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
-import { listTickets } from "@/modules/tickets/application/list-tickets";
+import { getTicketFilterOptions } from "@/modules/tickets/application/get-ticket-filter-options";
+import {
+  listTickets,
+  parseTicketListFilters,
+} from "@/modules/tickets/application/list-tickets";
+import { TicketPriority } from "@/modules/tickets/domain/ticket-priority";
+import { TicketStatus } from "@/modules/tickets/domain/ticket-status";
 
-export default async function TicketsPage() {
-  await requireAuthenticatedUser();
+type TicketsPageProps = {
+  searchParams: Promise<
+    Record<string, string | string[] | undefined>
+  >;
+};
 
-  const tickets = await listTickets();
+export default async function TicketsPage({
+  searchParams,
+}: TicketsPageProps) {
+  const user = await requireAuthenticatedUser();
+  const filters = parseTicketListFilters(await searchParams);
+
+  const [tickets, filterOptions] = await Promise.all([
+    listTickets(user, filters),
+    getTicketFilterOptions(user),
+  ]);
 
   return (
     <main>
@@ -16,8 +34,94 @@ export default async function TicketsPage() {
         <Link href="/dashboard/tickets/new">Nouveau ticket</Link>
       </div>
 
+      <form method="get">
+        <div>
+          <label htmlFor="status">Statut</label>
+          <select
+            id="status"
+            name="status"
+            defaultValue={filters.status ?? ""}
+          >
+            <option value="">Tous</option>
+            {Object.values(TicketStatus).map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="priority">Priorité</label>
+          <select
+            id="priority"
+            name="priority"
+            defaultValue={filters.priority ?? ""}
+          >
+            <option value="">Toutes</option>
+            {Object.values(TicketPriority).map((priority) => (
+              <option key={priority} value={priority}>
+                {priority}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="category">Catégorie</label>
+          <select
+            id="category"
+            name="category"
+            defaultValue={filters.categoryId ?? ""}
+          >
+            <option value="">Toutes</option>
+            {filterOptions.categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="assignee">Technicien assigné</label>
+          <select
+            id="assignee"
+            name="assignee"
+            defaultValue={filters.assignedToId ?? ""}
+          >
+            <option value="">Tous</option>
+            <option value="unassigned">Non assigné</option>
+            {filterOptions.technicians.map((technician) => (
+              <option key={technician.id} value={technician.id}>
+                {technician.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="creator">Créateur</label>
+          <select
+            id="creator"
+            name="creator"
+            defaultValue={filters.createdById ?? ""}
+          >
+            <option value="">Tous</option>
+            {filterOptions.creators.map((creator) => (
+              <option key={creator.id} value={creator.id}>
+                {creator.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button type="submit">Filtrer</button>
+        <Link href="/dashboard/tickets">Réinitialiser</Link>
+      </form>
+
       {tickets.length === 0 ? (
-        <p>Aucun ticket pour le moment.</p>
+        <p>Aucun ticket ne correspond aux filtres.</p>
       ) : (
         <table>
           <thead>
