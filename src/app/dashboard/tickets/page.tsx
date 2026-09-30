@@ -5,9 +5,12 @@ import { getTicketFilterOptions } from "@/modules/tickets/application/get-ticket
 import {
   listTickets,
   parseTicketListFilters,
+  parseTicketListPage,
 } from "@/modules/tickets/application/list-tickets";
 import { TicketPriority } from "@/modules/tickets/domain/ticket-priority";
 import { TicketStatus } from "@/modules/tickets/domain/ticket-status";
+
+import { TicketListPagination } from "./ticket-list-pagination";
 
 type TicketsPageProps = {
   searchParams: Promise<
@@ -19,10 +22,12 @@ export default async function TicketsPage({
   searchParams,
 }: TicketsPageProps) {
   const user = await requireAuthenticatedUser();
-  const filters = parseTicketListFilters(await searchParams);
+  const params = await searchParams;
+  const filters = parseTicketListFilters(params);
+  const requestedPage = parseTicketListPage(params.page);
 
-  const [tickets, filterOptions] = await Promise.all([
-    listTickets(user, filters),
+  const [ticketPage, filterOptions] = await Promise.all([
+    listTickets(user, filters, requestedPage),
     getTicketFilterOptions(user),
   ]);
 
@@ -120,7 +125,7 @@ export default async function TicketsPage({
         <Link href="/dashboard/tickets">Réinitialiser</Link>
       </form>
 
-      {tickets.length === 0 ? (
+      {ticketPage.items.length === 0 ? (
         <p>Aucun ticket ne correspond aux filtres.</p>
       ) : (
         <table>
@@ -137,7 +142,7 @@ export default async function TicketsPage({
           </thead>
 
           <tbody>
-            {tickets.map((ticket) => (
+            {ticketPage.items.map((ticket) => (
               <tr key={ticket.id}>
                 <td>
                   <Link href={`/dashboard/tickets/${ticket.id}`}>
@@ -158,6 +163,13 @@ export default async function TicketsPage({
           </tbody>
         </table>
       )}
+
+      <TicketListPagination
+        filters={filters}
+        page={ticketPage.page}
+        total={ticketPage.total}
+        totalPages={ticketPage.totalPages}
+      />
     </main>
   );
 }

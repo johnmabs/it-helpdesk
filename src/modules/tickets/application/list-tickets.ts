@@ -24,31 +24,49 @@ export type TicketListItem = {
   categoryName: string | null;
 };
 
+export const TICKET_LIST_PAGE_SIZE = 20;
+
+export type PaginatedTicketList = {
+  items: TicketListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
 export async function listTickets(
   viewer: TicketViewer,
   filters: TicketListFilters = {},
-): Promise<TicketListItem[]> {
+  requestedPage = 1,
+): Promise<PaginatedTicketList> {
   const createdById =
     viewer.role === UserRole.USER ? viewer.id : filters.createdById;
 
+  const where = {
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.priority ? { priority: filters.priority } : {}),
+    ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
+    ...(filters.assignedToId
+      ? {
+          assignedToId:
+            filters.assignedToId === "unassigned"
+              ? null
+              : filters.assignedToId,
+        }
+      : {}),
+    ...(createdById ? { createdById } : {}),
+  };
+  const normalizedRequestedPage =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const total = await prisma.ticket.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / TICKET_LIST_PAGE_SIZE));
+  const page = Math.min(normalizedRequestedPage, totalPages);
+
   const tickets = await prisma.ticket.findMany({
-    where: {
-      ...(filters.status ? { status: filters.status } : {}),
-      ...(filters.priority ? { priority: filters.priority } : {}),
-      ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
-      ...(filters.assignedToId
-        ? {
-            assignedToId:
-              filters.assignedToId === "unassigned"
-                ? null
-                : filters.assignedToId,
-          }
-        : {}),
-      ...(createdById ? { createdById } : {}),
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+    where,
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    skip: (page - 1) * TICKET_LIST_PAGE_SIZE,
+    take: TICKET_LIST_PAGE_SIZE,
     include: {
       createdBy: {
         select: {
@@ -68,16 +86,22 @@ export async function listTickets(
     },
   });
 
-  return tickets.map((ticket) => ({
-    id: ticket.id,
-    title: ticket.title,
-    status: ticket.status,
-    priority: ticket.priority,
-    createdAt: ticket.createdAt,
-    createdByName: ticket.createdBy.name,
-    assignedToName: ticket.assignedTo?.name ?? null,
-    categoryName: ticket.category?.name ?? null,
-  }));
+  return {
+    items: tickets.map((ticket) => ({
+      id: ticket.id,
+      title: ticket.title,
+      status: ticket.status,
+      priority: ticket.priority,
+      createdAt: ticket.createdAt,
+      createdByName: ticket.createdBy.name,
+      assignedToName: ticket.assignedTo?.name ?? null,
+      categoryName: ticket.category?.name ?? null,
+    })),
+    total,
+    page,
+    pageSize: TICKET_LIST_PAGE_SIZE,
+    totalPages,
+  };
 }
 
 export function parseTicketListFilters(
@@ -101,6 +125,20 @@ export function parseTicketListFilters(
     ...(assignedToId ? { assignedToId } : {}),
     ...(createdById ? { createdById } : {}),
   };
+}
+
+export function parseTicketListPage(
+  value: string | string[] | undefined,
+): number {
+  const rawPage = readSingleValue(value);
+
+  if (!rawPage) {
+    return 1;
+  }
+
+  const page = Number(rawPage);
+
+  return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
 function readSingleValue(
