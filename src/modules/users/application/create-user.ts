@@ -1,4 +1,8 @@
 import { PasswordHasher } from "@/modules/auth/domain/password-hasher";
+import {
+  UserEmailAlreadyExistsError,
+  ValidationError,
+} from "@/shared/errors/application-error";
 import { IdGenerator } from "@/shared/identity/id-generator";
 
 import { User } from "../domain/user";
@@ -32,11 +36,14 @@ export class CreateUser {
     const existingUser = await this.users.findByEmail(email);
 
     if (existingUser) {
-      throw new Error("User email already exists");
+      throw new UserEmailAlreadyExistsError();
     }
 
     if (input.password.length < 8) {
-      throw new Error("Password must contain at least 8 characters");
+      throw new ValidationError(
+        "Password must contain at least 8 characters",
+        "INVALID_PASSWORD",
+      );
     }
 
     const user = User.create({

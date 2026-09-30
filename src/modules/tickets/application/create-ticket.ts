@@ -1,4 +1,8 @@
 import { CategoryRepository } from "@/modules/categories/domain/category-repository";
+import {
+  CategoryInactiveError,
+  CategoryNotFoundError,
+} from "@/shared/errors/application-error";
 import { IdGenerator } from "@/shared/identity/id-generator";
 
 import { Ticket } from "../domain/ticket";
@@ -33,11 +37,11 @@ export class CreateTicket {
     const category = await this.categories.findById(input.categoryId);
 
     if (!category) {
-      throw new Error("Category not found");
+      throw new CategoryNotFoundError();
     }
 
     if (!category.active) {
-      throw new Error("Category is inactive");
+      throw new CategoryInactiveError();
     }
 
     const now = new Date();

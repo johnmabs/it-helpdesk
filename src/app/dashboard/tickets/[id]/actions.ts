@@ -13,6 +13,11 @@ import { TicketHistoryRecorder } from "@/modules/tickets/application/ticket-hist
 import { PrismaTicketHistoryRepository } from "@/modules/tickets/infrastructure/persistence/prisma-ticket-history-repository";
 import { PrismaTicketRepository } from "@/modules/tickets/infrastructure/persistence/prisma-ticket-repository";
 import { PrismaUserRepository } from "@/modules/users/infrastructure/persistence/prisma-user-repository";
+import {
+  ForbiddenError,
+  TicketNotFoundError,
+  ValidationError,
+} from "@/shared/errors/application-error";
 import { RandomIdGenerator } from "@/shared/identity/random-id-generator";
 
 export type AddTicketCommentState = {
@@ -31,7 +36,7 @@ function getTicketId(formData: FormData): string {
   const ticketId = formData.get("ticketId");
 
   if (typeof ticketId !== "string") {
-    throw new Error("Invalid ticket id");
+    throw new ValidationError("Invalid ticket id");
   }
 
   return ticketId;
@@ -45,7 +50,7 @@ export async function assignTicketAction(formData: FormData) {
   const technicianId = formData.get("technicianId");
 
   if (typeof technicianId !== "string") {
-    throw new Error("Invalid technician id");
+    throw new ValidationError("Invalid technician id");
   }
 
   const useCase = new AssignTicket(
@@ -142,20 +147,18 @@ export async function addTicketCommentAction(
       authenticatedUser: user,
     });
   } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === "Ticket not found") {
-        return {
-          error: "Ticket introuvable.",
-          submitted: false,
-        };
-      }
+    if (error instanceof TicketNotFoundError) {
+      return {
+        error: "Ticket introuvable.",
+        submitted: false,
+      };
+    }
 
-      if (error.message === "Not allowed to view this ticket") {
-        return {
-          error: "Vous n'êtes pas autorisé à commenter ce ticket.",
-          submitted: false,
-        };
-      }
+    if (error instanceof ForbiddenError) {
+      return {
+        error: "Vous n'êtes pas autorisé à commenter ce ticket.",
+        submitted: false,
+      };
     }
 
     return {

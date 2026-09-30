@@ -1,5 +1,10 @@
 import { UserRepository } from "@/modules/users/domain/user-repository";
 import { UserRole } from "@/modules/users/domain/user-role";
+import {
+  InvalidTicketAssigneeError,
+  TicketNotFoundError,
+  UserNotFoundError,
+} from "@/shared/errors/application-error";
 
 import { TicketHistoryAction } from "../domain/ticket-history-action";
 import { TicketRepository } from "../domain/ticket-repository";
@@ -22,24 +27,28 @@ export class AssignTicket {
     const ticket = await this.tickets.findById(input.ticketId);
 
     if (!ticket) {
-      throw new Error("Ticket not found");
+      throw new TicketNotFoundError();
     }
 
     const technician = await this.users.findById(input.technicianId);
 
     if (!technician) {
-      throw new Error("Technician not found");
+      throw new UserNotFoundError("Technician not found");
     }
 
     if (!technician.active) {
-      throw new Error("Inactive user cannot receive tickets");
+      throw new InvalidTicketAssigneeError(
+        "Inactive user cannot receive tickets",
+      );
     }
 
     if (
       technician.role !== UserRole.TECHNICIAN &&
       technician.role !== UserRole.ADMIN
     ) {
-      throw new Error("Ticket can only be assigned to a technician");
+      throw new InvalidTicketAssigneeError(
+        "Ticket can only be assigned to a technician",
+      );
     }
 
     const now = new Date();

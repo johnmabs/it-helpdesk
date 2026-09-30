@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CategoryInactiveError } from "@/shared/errors/application-error";
+
 const mocks = vi.hoisted(() => ({
   execute: vi.fn(),
   redirect: vi.fn(),
@@ -92,7 +94,7 @@ describe("createTicketAction", () => {
   });
 
   it("retourne une erreur lorsque la catégorie est inactive", async () => {
-    mocks.execute.mockRejectedValue(new Error("Category is inactive"));
+    mocks.execute.mockRejectedValue(new CategoryInactiveError());
 
     await expect(
       createTicketAction({ error: "" }, validFormData()),

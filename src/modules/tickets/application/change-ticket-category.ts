@@ -1,4 +1,9 @@
 import { CategoryRepository } from "@/modules/categories/domain/category-repository";
+import {
+  CategoryInactiveError,
+  CategoryNotFoundError,
+  TicketNotFoundError,
+} from "@/shared/errors/application-error";
 
 import { TicketHistoryAction } from "../domain/ticket-history-action";
 import { TicketRepository } from "../domain/ticket-repository";
@@ -21,17 +26,17 @@ export class ChangeTicketCategory {
     const ticket = await this.tickets.findById(input.ticketId);
 
     if (!ticket) {
-      throw new Error("Ticket not found");
+      throw new TicketNotFoundError();
     }
 
     const category = await this.categories.findById(input.categoryId);
 
     if (!category) {
-      throw new Error("Category not found");
+      throw new CategoryNotFoundError();
     }
 
     if (!category.active) {
-      throw new Error("Category is inactive");
+      throw new CategoryInactiveError();
     }
 
     const now = new Date();

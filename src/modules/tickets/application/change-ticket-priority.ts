@@ -1,3 +1,5 @@
+import { TicketNotFoundError } from "@/shared/errors/application-error";
+
 import { TicketHistoryAction } from "../domain/ticket-history-action";
 import { TicketPriority } from "../domain/ticket-priority";
 import { TicketRepository } from "../domain/ticket-repository";
@@ -19,7 +21,7 @@ export class ChangeTicketPriority {
     const ticket = await this.tickets.findById(input.ticketId);
 
     if (!ticket) {
-      throw new Error("Ticket not found");
+      throw new TicketNotFoundError();
     }
 
     const now = new Date();

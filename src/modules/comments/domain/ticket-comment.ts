@@ -1,3 +1,5 @@
+import { ValidationError } from "@/shared/errors/application-error";
+
 export type TicketCommentProps = {
   id: string;
   ticketId: string;
@@ -57,7 +59,7 @@ export class TicketComment {
     const normalizedBody = body.trim();
 
     if (!normalizedBody) {
-      throw new Error("Comment body is required");
+      throw new ValidationError("Comment body is required");
     }
 
     return normalizedBody;

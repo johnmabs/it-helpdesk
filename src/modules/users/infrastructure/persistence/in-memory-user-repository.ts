@@ -1,3 +1,5 @@
+import { UserNotFoundError } from "@/shared/errors/application-error";
+
 import {
   AuthenticationUser,
   PersistUserInput,
@@ -30,7 +32,7 @@ export class InMemoryUserRepository implements UserRepository {
     const stored = this.users.get(userId);
 
     if (!stored) {
-      throw new Error("User not found");
+      throw new UserNotFoundError();
     }
 
     this.users.set(userId, {
@@ -90,7 +92,7 @@ export class InMemoryUserRepository implements UserRepository {
     const stored = this.users.get(user.id);
 
     if (!stored) {
-      throw new Error("User not found");
+      throw new UserNotFoundError();
     }
 
     this.users.set(user.id, {

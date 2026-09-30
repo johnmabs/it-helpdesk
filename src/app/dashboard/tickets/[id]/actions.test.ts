@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { UserRole } from "@/modules/users/domain/user-role";
+import { ForbiddenError } from "@/shared/errors/application-error";
 
 const mocks = vi.hoisted(() => ({
   assignExecute: vi.fn(),
@@ -148,7 +149,7 @@ describe("addTicketCommentAction", () => {
 
   it("retourne une erreur lorsque l'utilisateur ne peut pas voir le ticket", async () => {
     mocks.execute.mockRejectedValue(
-      new Error("Not allowed to view this ticket"),
+      new ForbiddenError("Not allowed to view this ticket"),
     );
 
     await expect(

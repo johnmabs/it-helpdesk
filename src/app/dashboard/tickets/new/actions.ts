@@ -9,6 +9,10 @@ import { TicketHistoryRecorder } from "@/modules/tickets/application/ticket-hist
 import { TicketPriority } from "@/modules/tickets/domain/ticket-priority";
 import { PrismaTicketHistoryRepository } from "@/modules/tickets/infrastructure/persistence/prisma-ticket-history-repository";
 import { PrismaTicketRepository } from "@/modules/tickets/infrastructure/persistence/prisma-ticket-repository";
+import {
+  CategoryInactiveError,
+  CategoryNotFoundError,
+} from "@/shared/errors/application-error";
 import { RandomIdGenerator } from "@/shared/identity/random-id-generator";
 
 export type CreateTicketState = {
@@ -66,9 +70,8 @@ export async function createTicketAction(
     });
   } catch (error) {
     if (
-      error instanceof Error &&
-      (error.message === "Category not found" ||
-        error.message === "Category is inactive")
+      error instanceof CategoryNotFoundError ||
+      error instanceof CategoryInactiveError
     ) {
       return {
         error: "La catégorie sélectionnée n'est plus disponible.",

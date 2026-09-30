@@ -1,3 +1,5 @@
+import { CategoryNotFoundError } from "@/shared/errors/application-error";
+
 import { CategoryRepository } from "../domain/category-repository";
 
 export class DeactivateCategory {
@@ -7,7 +9,7 @@ export class DeactivateCategory {
     const category = await this.categories.findById(categoryId);
 
     if (!category) {
-      throw new Error("Category not found");
+      throw new CategoryNotFoundError();
     }
 
     category.deactivate();

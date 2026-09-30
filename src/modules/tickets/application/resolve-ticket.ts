@@ -1,3 +1,5 @@
+import { TicketNotFoundError } from "@/shared/errors/application-error";
+
 import { TicketHistoryAction } from "../domain/ticket-history-action";
 import { TicketRepository } from "../domain/ticket-repository";
 import { TicketHistoryRecorder } from "./ticket-history-recorder";
@@ -17,7 +19,7 @@ export class ResolveTicket {
     const ticket = await this.tickets.findById(input.ticketId);
 
     if (!ticket) {
-      throw new Error("Ticket not found");
+      throw new TicketNotFoundError();
     }
 
     const now = new Date();

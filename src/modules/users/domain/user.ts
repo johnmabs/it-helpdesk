@@ -1,3 +1,5 @@
+import { ValidationError } from "@/shared/errors/application-error";
+
 import { UserRole } from "./user-role";
 
 export type UserProps = {
@@ -17,11 +19,11 @@ export class User {
     const name = props.name.trim();
 
     if (!email) {
-      throw new Error("User email is required");
+      throw new ValidationError("User email is required");
     }
 
     if (!name) {
-      throw new Error("User name is required");
+      throw new ValidationError("User name is required");
     }
 
     return new User({

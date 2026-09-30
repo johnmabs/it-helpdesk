@@ -6,6 +6,11 @@ import { TicketRepository } from "@/modules/tickets/domain/ticket-repository";
 import { TicketHistoryAction } from "@/modules/tickets/domain/ticket-history-action";
 import { TicketHistoryRecorder } from "@/modules/tickets/application/ticket-history-recorder";
 import { IdGenerator } from "@/shared/identity/id-generator";
+import {
+  AuthenticationRequiredError,
+  ForbiddenError,
+  TicketNotFoundError,
+} from "@/shared/errors/application-error";
 
 import { TicketCommentRepository } from "../domain/ticket-comment-repository";
 import { TicketComment } from "../domain/ticket-comment";
@@ -36,17 +41,17 @@ export class AddTicketComment {
     input: AddTicketCommentInput,
   ): Promise<AddTicketCommentOutput> {
     if (!input.authenticatedUser) {
-      throw new Error("Authentication required");
+      throw new AuthenticationRequiredError();
     }
 
     const ticket = await this.tickets.findById(input.ticketId);
 
     if (!ticket) {
-      throw new Error("Ticket not found");
+      throw new TicketNotFoundError();
     }
 
     if (!canViewTicket(input.authenticatedUser, ticket)) {
-      throw new Error("Not allowed to view this ticket");
+      throw new ForbiddenError("Not allowed to view this ticket");
     }
 
     const comment = TicketComment.create({

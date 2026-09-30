@@ -1,3 +1,8 @@
+import {
+  CategoryNameAlreadyExistsError,
+  CategoryNotFoundError,
+} from "@/shared/errors/application-error";
+
 import { CategoryRepository } from "../domain/category-repository";
 import { CategoryOutput, toCategoryOutput } from "./category-output";
 
@@ -14,13 +19,13 @@ export class UpdateCategory {
     const category = await this.categories.findById(input.categoryId);
 
     if (!category) {
-      throw new Error("Category not found");
+      throw new CategoryNotFoundError();
     }
 
     const categoryWithSameName = await this.categories.findByName(input.name);
 
     if (categoryWithSameName && categoryWithSameName.id !== category.id) {
-      throw new Error("Category name already exists");
+      throw new CategoryNameAlreadyExistsError();
     }
 
     category.updateDetails(input.name, input.description);

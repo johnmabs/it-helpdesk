@@ -6,6 +6,10 @@ import { CreateCategory } from "@/modules/categories/application/create-category
 import { DeactivateCategory } from "@/modules/categories/application/deactivate-category";
 import { UpdateCategory } from "@/modules/categories/application/update-category";
 import { PrismaCategoryRepository } from "@/modules/categories/infrastructure/persistence/prisma-category-repository";
+import {
+  CategoryNameAlreadyExistsError,
+  CategoryNotFoundError,
+} from "@/shared/errors/application-error";
 import { RandomIdGenerator } from "@/shared/identity/random-id-generator";
 
 import { requireCategoryAdministrator } from "./require-category-administrator";
@@ -111,14 +115,12 @@ function readOptionalString(formData: FormData, field: string): string | null {
 }
 
 function categoryErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    if (error.message === "Category name already exists") {
-      return "Une catégorie avec ce nom existe déjà.";
-    }
+  if (error instanceof CategoryNameAlreadyExistsError) {
+    return "Une catégorie avec ce nom existe déjà.";
+  }
 
-    if (error.message === "Category not found") {
-      return "Catégorie introuvable.";
-    }
+  if (error instanceof CategoryNotFoundError) {
+    return "Catégorie introuvable.";
   }
 
   return "Impossible d'enregistrer la catégorie.";

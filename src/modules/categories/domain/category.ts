@@ -1,3 +1,5 @@
+import { ValidationError } from "@/shared/errors/application-error";
+
 export type CategoryProps = {
   id: string;
   name: string;
@@ -62,7 +64,7 @@ export class Category {
     const normalizedName = name.trim();
 
     if (!normalizedName) {
-      throw new Error("Category name is required");
+      throw new ValidationError("Category name is required");
     }
 
     return normalizedName;

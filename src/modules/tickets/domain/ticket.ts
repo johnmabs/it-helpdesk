@@ -1,3 +1,8 @@
+import {
+  InvalidTicketTransitionError,
+  ValidationError,
+} from "@/shared/errors/application-error";
+
 import { TicketPriority } from "./ticket-priority";
 import { TicketStatus } from "./ticket-status";
 
@@ -35,15 +40,15 @@ export class Ticket {
     const categoryId = props.categoryId.trim();
 
     if (!title) {
-      throw new Error("Ticket title is required");
+      throw new ValidationError("Ticket title is required");
     }
 
     if (!description) {
-      throw new Error("Ticket description is required");
+      throw new ValidationError("Ticket description is required");
     }
 
     if (!categoryId) {
-      throw new Error("Ticket category is required");
+      throw new ValidationError("Ticket category is required");
     }
 
     return new Ticket({
@@ -65,7 +70,9 @@ export class Ticket {
 
   assignTo(technicianId: string, now: Date): void {
     if (this.props.status !== TicketStatus.OPEN) {
-      throw new Error("Only open tickets can be assigned");
+      throw new InvalidTicketTransitionError(
+        "Only open tickets can be assigned",
+      );
     }
 
     this.props.assignedToId = technicianId;
@@ -75,7 +82,9 @@ export class Ticket {
 
   start(now: Date): void {
     if (this.props.status !== TicketStatus.ASSIGNED) {
-      throw new Error("Only assigned tickets can be started");
+      throw new InvalidTicketTransitionError(
+        "Only assigned tickets can be started",
+      );
     }
 
     this.props.status = TicketStatus.IN_PROGRESS;
@@ -84,7 +93,9 @@ export class Ticket {
 
   resolve(now: Date): void {
     if (this.props.status !== TicketStatus.IN_PROGRESS) {
-      throw new Error("Only tickets in progress can be resolved");
+      throw new InvalidTicketTransitionError(
+        "Only tickets in progress can be resolved",
+      );
     }
 
     this.props.status = TicketStatus.RESOLVED;
@@ -94,7 +105,9 @@ export class Ticket {
 
   close(now: Date): void {
     if (this.props.status !== TicketStatus.RESOLVED) {
-      throw new Error("Only resolved tickets can be closed");
+      throw new InvalidTicketTransitionError(
+        "Only resolved tickets can be closed",
+      );
     }
 
     this.props.status = TicketStatus.CLOSED;
@@ -107,7 +120,9 @@ export class Ticket {
       this.props.status === TicketStatus.CLOSED ||
       this.props.status === TicketStatus.CANCELLED
     ) {
-      throw new Error("Closed or cancelled tickets cannot be cancelled");
+      throw new InvalidTicketTransitionError(
+        "Closed or cancelled tickets cannot be cancelled",
+      );
     }
 
     this.props.status = TicketStatus.CANCELLED;
@@ -119,7 +134,9 @@ export class Ticket {
       this.props.status === TicketStatus.CLOSED ||
       this.props.status === TicketStatus.CANCELLED
     ) {
-      throw new Error("Closed or cancelled tickets cannot be updated");
+      throw new InvalidTicketTransitionError(
+        "Closed or cancelled tickets cannot be updated",
+      );
     }
 
     this.props.priority = priority;
@@ -131,13 +148,15 @@ export class Ticket {
       this.props.status === TicketStatus.CLOSED ||
       this.props.status === TicketStatus.CANCELLED
     ) {
-      throw new Error("Closed or cancelled tickets cannot be updated");
+      throw new InvalidTicketTransitionError(
+        "Closed or cancelled tickets cannot be updated",
+      );
     }
 
     const normalizedCategoryId = categoryId.trim();
 
     if (!normalizedCategoryId) {
-      throw new Error("Ticket category is required");
+      throw new ValidationError("Ticket category is required");
     }
 
     this.props.categoryId = normalizedCategoryId;

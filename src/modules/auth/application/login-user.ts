@@ -1,5 +1,6 @@
 import { UserRepository } from "@/modules/users/domain/user-repository";
 import { UserRole } from "@/modules/users/domain/user-role";
+import { InvalidCredentialsError } from "@/shared/errors/application-error";
 
 import { PasswordHasher } from "../domain/password-hasher";
 
@@ -25,11 +26,11 @@ export class LoginUser {
     const user = await this.users.findForAuthentication(input.email);
 
     if (!user) {
-      throw new Error("Invalid credentials");
+      throw new InvalidCredentialsError();
     }
 
     if (!user.active) {
-      throw new Error("Invalid credentials");
+      throw new InvalidCredentialsError();
     }
 
     const passwordMatches = await this.passwordHasher.verify(
@@ -38,7 +39,7 @@ export class LoginUser {
     );
 
     if (!passwordMatches) {
-      throw new Error("Invalid credentials");
+      throw new InvalidCredentialsError();
     }
 
     return {

@@ -1,3 +1,4 @@
+import { CategoryNameAlreadyExistsError } from "@/shared/errors/application-error";
 import { IdGenerator } from "@/shared/identity/id-generator";
 
 import { Category } from "../domain/category";
@@ -19,7 +20,7 @@ export class CreateCategory {
     const existingCategory = await this.categories.findByName(input.name);
 
     if (existingCategory) {
-      throw new Error("Category name already exists");
+      throw new CategoryNameAlreadyExistsError();
     }
 
     const category = Category.create({
