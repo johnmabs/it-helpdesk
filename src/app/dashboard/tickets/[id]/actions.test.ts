@@ -245,13 +245,24 @@ describe("ticket workflow actions", () => {
     expect(mocks.changePriorityExecute).not.toHaveBeenCalled();
   });
 
+  it("forbids a standard user from invoking assignment directly", async () => {
+    mocks.requireAuthenticatedUser.mockResolvedValue({
+      id: "requester-1",
+      email: "requester@example.com",
+      role: UserRole.USER,
+    });
+    const formData = new FormData();
+    formData.set("ticketId", "ticket-1");
+    formData.set("technicianId", "technician-1");
+
+    await expect(assignTicketAction(formData)).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+    expect(mocks.assignExecute).not.toHaveBeenCalled();
+    expect(mocks.revalidatePath).not.toHaveBeenCalled();
+  });
+
   it.each([
-    [
-      "assign",
-      assignTicketAction,
-      mocks.assignExecute,
-      { technicianId: "technician-1" },
-    ],
     ["start", startTicketAction, mocks.startExecute, {}],
     ["resolve", resolveTicketAction, mocks.resolveExecute, {}],
     ["close", closeTicketAction, mocks.closeExecute, {}],
