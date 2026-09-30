@@ -6,10 +6,12 @@ import {
   canViewTicket,
 } from "@/modules/auth/domain/permissions";
 import { getTicketDetails } from "@/modules/tickets/application/get-ticket-details";
+import { listTicketHistory } from "@/modules/tickets/application/list-ticket-history";
 import { listAssignableUsers } from "@/modules/users/application/list-assignable-users";
 
 import { AddTicketCommentForm } from "./add-ticket-comment-form";
 import { TicketActions } from "./ticket-actions";
+import { TicketHistoryTimeline } from "./ticket-history-timeline";
 
 type PageProps = {
   params: Promise<{
@@ -31,9 +33,10 @@ export default async function TicketPage({ params }: PageProps) {
     notFound();
   }
 
-  const assignableUsers = canAssignTicket(user.role)
-    ? await listAssignableUsers()
-    : [];
+  const [assignableUsers, history] = await Promise.all([
+    canAssignTicket(user.role) ? listAssignableUsers() : Promise.resolve([]),
+    listTicketHistory(ticket.id),
+  ]);
 
   return (
     <main>
@@ -78,6 +81,8 @@ export default async function TicketPage({ params }: PageProps) {
         role={user.role}
         assignableUsers={assignableUsers}
       />
+
+      <TicketHistoryTimeline entries={history} />
 
       <section>
         <h2>Commentaires</h2>
