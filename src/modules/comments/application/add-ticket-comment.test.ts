@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { Ticket } from "@/modules/tickets/domain/ticket";
+import { TicketHistoryAction } from "@/modules/tickets/domain/ticket-history-action";
 import { TicketPriority } from "@/modules/tickets/domain/ticket-priority";
+import { TicketHistoryRecorder } from "@/modules/tickets/application/ticket-history-recorder";
+import { InMemoryTicketHistoryRepository } from "@/modules/tickets/infrastructure/persistence/in-memory-ticket-history-repository";
 import { InMemoryTicketRepository } from "@/modules/tickets/infrastructure/persistence/in-memory-ticket-repository";
 import { UserRole } from "@/modules/users/domain/user-role";
 import { FixedIdGenerator } from "@/shared/identity/fixed-id-generator";
@@ -12,15 +15,21 @@ import { AddTicketComment } from "./add-ticket-comment";
 describe("AddTicketComment", () => {
   let tickets: InMemoryTicketRepository;
   let comments: InMemoryTicketCommentRepository;
+  let history: InMemoryTicketHistoryRepository;
   let addTicketComment: AddTicketComment;
 
   beforeEach(async () => {
     tickets = new InMemoryTicketRepository();
     comments = new InMemoryTicketCommentRepository();
+    history = new InMemoryTicketHistoryRepository();
     addTicketComment = new AddTicketComment(
       tickets,
       comments,
       new FixedIdGenerator("comment-1"),
+      new TicketHistoryRecorder(
+        history,
+        new FixedIdGenerator("history-1"),
+      ),
     );
 
     await tickets.save(
@@ -59,6 +68,14 @@ describe("AddTicketComment", () => {
       authorId: userId,
       body: "The replacement part has been ordered.",
     });
+    await expect(history.findByTicketId("ticket-1")).resolves.toMatchObject([
+      {
+        actorId: userId,
+        action: TicketHistoryAction.COMMENT_ADDED,
+        oldValue: null,
+        newValue: "The replacement part has been ordered.",
+      },
+    ]);
   });
 
   it("rejects an unauthenticated user", async () => {
@@ -71,6 +88,7 @@ describe("AddTicketComment", () => {
     ).rejects.toThrow("Authentication required");
 
     await expect(comments.findById("comment-1")).resolves.toBeNull();
+    await expect(history.findByTicketId("ticket-1")).resolves.toEqual([]);
   });
 
   it("rejects an empty comment", async () => {
@@ -86,6 +104,7 @@ describe("AddTicketComment", () => {
     ).rejects.toThrow("Comment body is required");
 
     await expect(comments.findById("comment-1")).resolves.toBeNull();
+    await expect(history.findByTicketId("ticket-1")).resolves.toEqual([]);
   });
 
   it("rejects a user who cannot view the ticket", async () => {
@@ -101,6 +120,7 @@ describe("AddTicketComment", () => {
     ).rejects.toThrow("Not allowed to view this ticket");
 
     await expect(comments.findById("comment-1")).resolves.toBeNull();
+    await expect(history.findByTicketId("ticket-1")).resolves.toEqual([]);
   });
 
   it("rejects an unknown ticket", async () => {
@@ -116,5 +136,8 @@ describe("AddTicketComment", () => {
     ).rejects.toThrow("Ticket not found");
 
     await expect(comments.findById("comment-1")).resolves.toBeNull();
+    await expect(history.findByTicketId("unknown-ticket")).resolves.toEqual(
+      [],
+    );
   });
 });

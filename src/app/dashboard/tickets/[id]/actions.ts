@@ -9,6 +9,8 @@ import { AssignTicket } from "@/modules/tickets/application/assign-ticket";
 import { CloseTicket } from "@/modules/tickets/application/close-ticket";
 import { ResolveTicket } from "@/modules/tickets/application/resolve-ticket";
 import { StartTicket } from "@/modules/tickets/application/start-ticket";
+import { TicketHistoryRecorder } from "@/modules/tickets/application/ticket-history-recorder";
+import { PrismaTicketHistoryRepository } from "@/modules/tickets/infrastructure/persistence/prisma-ticket-history-repository";
 import { PrismaTicketRepository } from "@/modules/tickets/infrastructure/persistence/prisma-ticket-repository";
 import { PrismaUserRepository } from "@/modules/users/infrastructure/persistence/prisma-user-repository";
 import { RandomIdGenerator } from "@/shared/identity/random-id-generator";
@@ -17,6 +19,13 @@ export type AddTicketCommentState = {
   error: string;
   submitted: boolean;
 };
+
+function createTicketHistoryRecorder(): TicketHistoryRecorder {
+  return new TicketHistoryRecorder(
+    new PrismaTicketHistoryRepository(),
+    new RandomIdGenerator(),
+  );
+}
 
 function getTicketId(formData: FormData): string {
   const ticketId = formData.get("ticketId");
@@ -29,7 +38,7 @@ function getTicketId(formData: FormData): string {
 }
 
 export async function assignTicketAction(formData: FormData) {
-  await requireAuthenticatedUser();
+  const user = await requireAuthenticatedUser();
 
   const ticketId = getTicketId(formData);
 
@@ -42,48 +51,59 @@ export async function assignTicketAction(formData: FormData) {
   const useCase = new AssignTicket(
     new PrismaTicketRepository(),
     new PrismaUserRepository(),
+    createTicketHistoryRecorder(),
   );
 
   await useCase.execute({
     ticketId,
     technicianId,
+    actorId: user.id,
   });
 
   revalidatePath(`/dashboard/tickets/${ticketId}`);
 }
 
 export async function startTicketAction(formData: FormData) {
-  await requireAuthenticatedUser();
+  const user = await requireAuthenticatedUser();
 
   const ticketId = getTicketId(formData);
 
-  const useCase = new StartTicket(new PrismaTicketRepository());
+  const useCase = new StartTicket(
+    new PrismaTicketRepository(),
+    createTicketHistoryRecorder(),
+  );
 
-  await useCase.execute(ticketId);
+  await useCase.execute({ ticketId, actorId: user.id });
 
   revalidatePath(`/dashboard/tickets/${ticketId}`);
 }
 
 export async function resolveTicketAction(formData: FormData) {
-  await requireAuthenticatedUser();
+  const user = await requireAuthenticatedUser();
 
   const ticketId = getTicketId(formData);
 
-  const useCase = new ResolveTicket(new PrismaTicketRepository());
+  const useCase = new ResolveTicket(
+    new PrismaTicketRepository(),
+    createTicketHistoryRecorder(),
+  );
 
-  await useCase.execute(ticketId);
+  await useCase.execute({ ticketId, actorId: user.id });
 
   revalidatePath(`/dashboard/tickets/${ticketId}`);
 }
 
 export async function closeTicketAction(formData: FormData) {
-  await requireAuthenticatedUser();
+  const user = await requireAuthenticatedUser();
 
   const ticketId = getTicketId(formData);
 
-  const useCase = new CloseTicket(new PrismaTicketRepository());
+  const useCase = new CloseTicket(
+    new PrismaTicketRepository(),
+    createTicketHistoryRecorder(),
+  );
 
-  await useCase.execute(ticketId);
+  await useCase.execute({ ticketId, actorId: user.id });
 
   revalidatePath(`/dashboard/tickets/${ticketId}`);
 }
@@ -112,6 +132,7 @@ export async function addTicketCommentAction(
     new PrismaTicketRepository(),
     new PrismaTicketCommentRepository(),
     new RandomIdGenerator(),
+    createTicketHistoryRecorder(),
   );
 
   try {

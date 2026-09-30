@@ -3,6 +3,8 @@ import {
   TicketViewer,
 } from "@/modules/auth/domain/permissions";
 import { TicketRepository } from "@/modules/tickets/domain/ticket-repository";
+import { TicketHistoryAction } from "@/modules/tickets/domain/ticket-history-action";
+import { TicketHistoryRecorder } from "@/modules/tickets/application/ticket-history-recorder";
 import { IdGenerator } from "@/shared/identity/id-generator";
 
 import { TicketCommentRepository } from "../domain/ticket-comment-repository";
@@ -27,6 +29,7 @@ export class AddTicketComment {
     private readonly tickets: TicketRepository,
     private readonly comments: TicketCommentRepository,
     private readonly idGenerator: IdGenerator,
+    private readonly history: TicketHistoryRecorder,
   ) {}
 
   async execute(
@@ -55,6 +58,13 @@ export class AddTicketComment {
     });
 
     await this.comments.save(comment);
+    await this.history.record({
+      ticketId: comment.ticketId,
+      actorId: comment.authorId,
+      action: TicketHistoryAction.COMMENT_ADDED,
+      newValue: comment.body,
+      createdAt: comment.createdAt,
+    });
 
     return {
       id: comment.id,

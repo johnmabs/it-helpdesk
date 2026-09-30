@@ -2,8 +2,10 @@ import { CategoryRepository } from "@/modules/categories/domain/category-reposit
 import { IdGenerator } from "@/shared/identity/id-generator";
 
 import { Ticket } from "../domain/ticket";
+import { TicketHistoryAction } from "../domain/ticket-history-action";
 import { TicketPriority } from "../domain/ticket-priority";
 import { TicketRepository } from "../domain/ticket-repository";
+import { TicketHistoryRecorder } from "./ticket-history-recorder";
 
 export type CreateTicketInput = {
   title: string;
@@ -24,6 +26,7 @@ export class CreateTicket {
     private readonly tickets: TicketRepository,
     private readonly idGenerator: IdGenerator,
     private readonly categories: CategoryRepository,
+    private readonly history: TicketHistoryRecorder,
   ) {}
 
   async execute(input: CreateTicketInput): Promise<CreateTicketOutput> {
@@ -50,6 +53,12 @@ export class CreateTicket {
     });
 
     await this.tickets.save(ticket);
+    await this.history.record({
+      ticketId: ticket.id,
+      actorId: input.createdById,
+      action: TicketHistoryAction.TICKET_CREATED,
+      createdAt: now,
+    });
 
     return {
       id: ticket.id,

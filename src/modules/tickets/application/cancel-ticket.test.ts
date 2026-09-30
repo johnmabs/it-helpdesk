@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { FixedIdGenerator } from "@/shared/identity/fixed-id-generator";
 
 import { Ticket } from "../domain/ticket";
@@ -7,57 +8,34 @@ import { TicketPriority } from "../domain/ticket-priority";
 import { TicketStatus } from "../domain/ticket-status";
 import { InMemoryTicketHistoryRepository } from "../infrastructure/persistence/in-memory-ticket-history-repository";
 import { InMemoryTicketRepository } from "../infrastructure/persistence/in-memory-ticket-repository";
-import { ResolveTicket } from "./resolve-ticket";
+import { CancelTicket } from "./cancel-ticket";
 import { TicketHistoryRecorder } from "./ticket-history-recorder";
 
-describe("ResolveTicket", () => {
-  it("resolves a ticket in progress", async () => {
+describe("CancelTicket", () => {
+  it("cancels a ticket and records the status change", async () => {
     const tickets = new InMemoryTicketRepository();
     const history = new InMemoryTicketHistoryRepository();
     await tickets.save(makeTicket());
 
-    const ticket = await tickets.findById("ticket-1");
-    ticket!.assignTo("tech-1", new Date());
-    ticket!.start(new Date());
-    await tickets.save(ticket!);
-
-    await new ResolveTicket(
+    await new CancelTicket(
       tickets,
       new TicketHistoryRecorder(
         history,
         new FixedIdGenerator("history-1"),
       ),
-    ).execute({ ticketId: "ticket-1", actorId: "tech-1" });
+    ).execute({ ticketId: "ticket-1", actorId: "admin-1" });
 
-    const resolvedTicket = await tickets.findById("ticket-1");
-
-    expect(resolvedTicket?.status).toBe(TicketStatus.RESOLVED);
-    expect(resolvedTicket?.resolvedAt).toBeInstanceOf(Date);
+    expect((await tickets.findById("ticket-1"))?.status).toBe(
+      TicketStatus.CANCELLED,
+    );
     await expect(history.findByTicketId("ticket-1")).resolves.toMatchObject([
       {
-        actorId: "tech-1",
+        actorId: "admin-1",
         action: TicketHistoryAction.STATUS_CHANGED,
-        oldValue: TicketStatus.IN_PROGRESS,
-        newValue: TicketStatus.RESOLVED,
+        oldValue: TicketStatus.OPEN,
+        newValue: TicketStatus.CANCELLED,
       },
     ]);
-  });
-
-  it("rejects an unknown ticket", async () => {
-    const resolveTicket = new ResolveTicket(
-      new InMemoryTicketRepository(),
-      new TicketHistoryRecorder(
-        new InMemoryTicketHistoryRepository(),
-        new FixedIdGenerator("history-1"),
-      ),
-    );
-
-    await expect(
-      resolveTicket.execute({
-        ticketId: "unknown-ticket",
-        actorId: "tech-1",
-      }),
-    ).rejects.toThrow("Ticket not found");
   });
 });
 

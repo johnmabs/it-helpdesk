@@ -34,6 +34,13 @@ vi.mock(
   }),
 );
 
+vi.mock(
+  "@/modules/tickets/infrastructure/persistence/prisma-ticket-history-repository",
+  () => ({
+    PrismaTicketHistoryRepository: class {},
+  }),
+);
+
 vi.mock("@/shared/identity/random-id-generator", () => ({
   RandomIdGenerator: class {},
 }));

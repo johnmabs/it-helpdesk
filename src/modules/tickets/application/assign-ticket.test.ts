@@ -3,22 +3,35 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { User } from "@/modules/users/domain/user";
 import { UserRole } from "@/modules/users/domain/user-role";
 import { InMemoryUserRepository } from "@/modules/users/infrastructure/persistence/in-memory-user-repository";
+import { FixedIdGenerator } from "@/shared/identity/fixed-id-generator";
 
 import { Ticket } from "../domain/ticket";
+import { TicketHistoryAction } from "../domain/ticket-history-action";
 import { TicketPriority } from "../domain/ticket-priority";
 import { TicketStatus } from "../domain/ticket-status";
+import { InMemoryTicketHistoryRepository } from "../infrastructure/persistence/in-memory-ticket-history-repository";
 import { InMemoryTicketRepository } from "../infrastructure/persistence/in-memory-ticket-repository";
 import { AssignTicket } from "./assign-ticket";
+import { TicketHistoryRecorder } from "./ticket-history-recorder";
 
 describe("AssignTicket", () => {
   let tickets: InMemoryTicketRepository;
   let users: InMemoryUserRepository;
+  let history: InMemoryTicketHistoryRepository;
   let assignTicket: AssignTicket;
 
   beforeEach(async () => {
     tickets = new InMemoryTicketRepository();
     users = new InMemoryUserRepository();
-    assignTicket = new AssignTicket(tickets, users);
+    history = new InMemoryTicketHistoryRepository();
+    assignTicket = new AssignTicket(
+      tickets,
+      users,
+      new TicketHistoryRecorder(
+        history,
+        new FixedIdGenerator("history-1"),
+      ),
+    );
 
     await tickets.save(
       Ticket.create({
@@ -41,12 +54,21 @@ describe("AssignTicket", () => {
       await assignTicket.execute({
         ticketId: "ticket-1",
         technicianId: "assignee-1",
+        actorId: "dispatcher-1",
       });
 
       const ticket = await tickets.findById("ticket-1");
 
       expect(ticket?.assignedToId).toBe("assignee-1");
       expect(ticket?.status).toBe(TicketStatus.ASSIGNED);
+      await expect(history.findByTicketId("ticket-1")).resolves.toMatchObject([
+        {
+          actorId: "dispatcher-1",
+          action: TicketHistoryAction.ASSIGNED,
+          oldValue: null,
+          newValue: "assignee-1",
+        },
+      ]);
     },
   );
 
@@ -55,6 +77,7 @@ describe("AssignTicket", () => {
       assignTicket.execute({
         ticketId: "ticket-1",
         technicianId: "unknown-user",
+        actorId: "dispatcher-1",
       }),
     ).rejects.toThrow("Technician not found");
 
@@ -68,6 +91,7 @@ describe("AssignTicket", () => {
       assignTicket.execute({
         ticketId: "ticket-1",
         technicianId: "assignee-1",
+        actorId: "dispatcher-1",
       }),
     ).rejects.toThrow("Inactive user cannot receive tickets");
 
@@ -81,6 +105,7 @@ describe("AssignTicket", () => {
       assignTicket.execute({
         ticketId: "ticket-1",
         technicianId: "assignee-1",
+        actorId: "dispatcher-1",
       }),
     ).rejects.toThrow("Ticket can only be assigned to a technician");
 
@@ -112,5 +137,6 @@ describe("AssignTicket", () => {
 
     expect(ticket?.assignedToId).toBeNull();
     expect(ticket?.status).toBe(TicketStatus.OPEN);
+    await expect(history.findByTicketId("ticket-1")).resolves.toEqual([]);
   }
 });

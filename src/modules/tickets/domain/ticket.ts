@@ -126,6 +126,24 @@ export class Ticket {
     this.props.updatedAt = now;
   }
 
+  changeCategory(categoryId: string, now: Date): void {
+    if (
+      this.props.status === TicketStatus.CLOSED ||
+      this.props.status === TicketStatus.CANCELLED
+    ) {
+      throw new Error("Closed or cancelled tickets cannot be updated");
+    }
+
+    const normalizedCategoryId = categoryId.trim();
+
+    if (!normalizedCategoryId) {
+      throw new Error("Ticket category is required");
+    }
+
+    this.props.categoryId = normalizedCategoryId;
+    this.props.updatedAt = now;
+  }
+
   get id(): string {
     return this.props.id;
   }
