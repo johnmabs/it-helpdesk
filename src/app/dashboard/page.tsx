@@ -1,11 +1,17 @@
+import Link from "next/link";
+
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import { getTicketSummaryMetrics } from "@/modules/tickets/application/get-ticket-summary-metrics";
+import { listRecentTickets } from "@/modules/tickets/application/list-recent-tickets";
 
 import { logoutAction } from "./actions";
 
 export default async function DashboardPage() {
   const user = await requireAuthenticatedUser();
-  const metrics = await getTicketSummaryMetrics(user);
+  const [metrics, recentTickets] = await Promise.all([
+    getTicketSummaryMetrics(user),
+    listRecentTickets(user),
+  ]);
 
   const summary = [
     { label: "Tickets ouverts", value: metrics.open },
@@ -33,6 +39,51 @@ export default async function DashboardPage() {
             </div>
           ))}
         </dl>
+      </section>
+
+      <section aria-labelledby="recent-tickets-heading">
+        <div>
+          <h2 id="recent-tickets-heading">Tickets récents</h2>
+          <Link href="/dashboard/tickets">Voir tous les tickets</Link>
+        </div>
+
+        {recentTickets.length === 0 ? (
+          <p>Aucun ticket récent.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Priorité</th>
+                <th>Catégorie</th>
+                <th>Statut</th>
+                <th>Assigné à</th>
+                <th>Dernière activité</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {recentTickets.map((ticket) => (
+                <tr key={ticket.id}>
+                  <td>
+                    <Link href={`/dashboard/tickets/${ticket.id}`}>
+                      {ticket.title}
+                    </Link>
+                  </td>
+                  <td>{ticket.priority}</td>
+                  <td>{ticket.categoryName ?? "Non classé"}</td>
+                  <td>{ticket.status}</td>
+                  <td>{ticket.assignedToName ?? "—"}</td>
+                  <td>
+                    <time dateTime={ticket.updatedAt.toISOString()}>
+                      {ticket.updatedAt.toLocaleString("fr-FR")}
+                    </time>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
 
       <form action={logoutAction}>
