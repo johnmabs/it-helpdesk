@@ -11,3 +11,23 @@ export function canAssignTicket(role: UserRole): boolean {
 export function canManageCategories(role: UserRole): boolean {
   return role === UserRole.ADMIN;
 }
+
+export type TicketViewer = {
+  id: string;
+  role: UserRole;
+};
+
+export type ViewableTicket = {
+  createdById: string;
+};
+
+export function canViewTicket(
+  viewer: TicketViewer,
+  ticket: ViewableTicket,
+): boolean {
+  return (
+    viewer.role === UserRole.ADMIN ||
+    viewer.role === UserRole.TECHNICIAN ||
+    ticket.createdById === viewer.id
+  );
+}
