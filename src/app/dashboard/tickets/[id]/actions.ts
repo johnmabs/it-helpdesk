@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
-import { canAssignTicket } from "@/modules/auth/domain/permissions";
+import { canManageTickets } from "@/modules/auth/domain/permissions";
+import { UserRole } from "@/modules/users/domain/user-role";
 import { AddTicketComment } from "@/modules/comments/application/add-ticket-comment";
 import { PrismaTicketCommentRepository } from "@/modules/comments/infrastructure/persistence/prisma-ticket-comment-repository";
 import { AssignTicket } from "@/modules/tickets/application/assign-ticket";
@@ -38,6 +39,12 @@ function createTicketHistoryRecorder(): TicketHistoryRecorder {
   );
 }
 
+function requireTicketManager(role: UserRole): void {
+  if (!canManageTickets(role)) {
+    throw new ForbiddenError("Not allowed to manage ticket workflow");
+  }
+}
+
 function getTicketId(formData: FormData): string {
   const ticketId = formData.get("ticketId");
 
@@ -50,6 +57,7 @@ function getTicketId(formData: FormData): string {
 
 export async function assignTicketAction(formData: FormData) {
   const user = await requireAuthenticatedUser();
+  requireTicketManager(user.role);
 
   const ticketId = getTicketId(formData);
 
@@ -76,6 +84,7 @@ export async function assignTicketAction(formData: FormData) {
 
 export async function startTicketAction(formData: FormData) {
   const user = await requireAuthenticatedUser();
+  requireTicketManager(user.role);
 
   const ticketId = getTicketId(formData);
 
@@ -91,6 +100,7 @@ export async function startTicketAction(formData: FormData) {
 
 export async function resolveTicketAction(formData: FormData) {
   const user = await requireAuthenticatedUser();
+  requireTicketManager(user.role);
 
   const ticketId = getTicketId(formData);
 
@@ -106,6 +116,7 @@ export async function resolveTicketAction(formData: FormData) {
 
 export async function closeTicketAction(formData: FormData) {
   const user = await requireAuthenticatedUser();
+  requireTicketManager(user.role);
 
   const ticketId = getTicketId(formData);
 
@@ -121,10 +132,7 @@ export async function closeTicketAction(formData: FormData) {
 
 export async function changeTicketPriorityAction(formData: FormData) {
   const user = await requireAuthenticatedUser();
-
-  if (!canAssignTicket(user.role)) {
-    throw new ForbiddenError("Not allowed to change ticket priority");
-  }
+  requireTicketManager(user.role);
 
   const request = changeTicketPriorityRequestSchema.safeParse({
     ticketId: formData.get("ticketId"),

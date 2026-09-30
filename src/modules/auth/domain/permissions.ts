@@ -5,6 +5,10 @@ export function canManageUsers(role: UserRole): boolean {
 }
 
 export function canAssignTicket(role: UserRole): boolean {
+  return canManageTickets(role);
+}
+
+export function canManageTickets(role: UserRole): boolean {
   return role === UserRole.ADMIN || role === UserRole.TECHNICIAN;
 }
 

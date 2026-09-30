@@ -245,19 +245,40 @@ describe("ticket workflow actions", () => {
     expect(mocks.changePriorityExecute).not.toHaveBeenCalled();
   });
 
-  it("forbids a standard user from changing a ticket priority", async () => {
-    mocks.requireAuthenticatedUser.mockResolvedValue({
-      id: "requester-1",
-      email: "requester@example.com",
-      role: UserRole.USER,
-    });
-    const formData = new FormData();
-    formData.set("ticketId", "ticket-1");
-    formData.set("priority", "HIGH");
+  it.each([
+    [
+      "assign",
+      assignTicketAction,
+      mocks.assignExecute,
+      { technicianId: "technician-1" },
+    ],
+    ["start", startTicketAction, mocks.startExecute, {}],
+    ["resolve", resolveTicketAction, mocks.resolveExecute, {}],
+    ["close", closeTicketAction, mocks.closeExecute, {}],
+    [
+      "change priority",
+      changeTicketPriorityAction,
+      mocks.changePriorityExecute,
+      { priority: "HIGH" },
+    ],
+  ])(
+    "forbids a standard user from invoking the %s action directly",
+    async (_, action, execute, additionalFields) => {
+      mocks.requireAuthenticatedUser.mockResolvedValue({
+        id: "requester-1",
+        email: "requester@example.com",
+        role: UserRole.USER,
+      });
+      const formData = new FormData();
+      formData.set("ticketId", "ticket-1");
 
-    await expect(changeTicketPriorityAction(formData)).rejects.toBeInstanceOf(
-      ForbiddenError,
-    );
-    expect(mocks.changePriorityExecute).not.toHaveBeenCalled();
-  });
+      for (const [field, value] of Object.entries(additionalFields)) {
+        formData.set(field, value);
+      }
+
+      await expect(action(formData)).rejects.toBeInstanceOf(ForbiddenError);
+      expect(execute).not.toHaveBeenCalled();
+      expect(mocks.revalidatePath).not.toHaveBeenCalled();
+    },
+  );
 });

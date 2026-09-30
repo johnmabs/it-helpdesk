@@ -4,6 +4,7 @@ import { UserRole } from "@/modules/users/domain/user-role";
 
 import {
   canManageCategories,
+  canManageTickets,
   canManageUsers,
   canViewTicket,
 } from "./permissions";
@@ -25,6 +26,12 @@ describe("role-based permissions", () => {
     expect(canManageCategories(UserRole.USER)).toBe(false);
     expect(canManageCategories(UserRole.TECHNICIAN)).toBe(false);
     expect(canManageCategories(UserRole.ADMIN)).toBe(true);
+  });
+
+  it("only staff can manage ticket workflow", () => {
+    expect(canManageTickets(UserRole.USER)).toBe(false);
+    expect(canManageTickets(UserRole.TECHNICIAN)).toBe(true);
+    expect(canManageTickets(UserRole.ADMIN)).toBe(true);
   });
 
   it("allows a requester to view their own ticket", () => {
