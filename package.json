@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "audit:dependencies": "pnpm audit --audit-level high",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
