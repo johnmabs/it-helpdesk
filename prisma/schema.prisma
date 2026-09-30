@@ -29,6 +29,15 @@ enum TicketPriority {
   CRITICAL
 }
 
+enum TicketHistoryAction {
+  TICKET_CREATED
+  PRIORITY_CHANGED
+  ASSIGNED
+  STATUS_CHANGED
+  CATEGORY_CHANGED
+  COMMENT_ADDED
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -43,6 +52,7 @@ model User {
   createdTickets   Ticket[]        @relation("CreatedTickets")
   assignedTickets  Ticket[]        @relation("AssignedTickets")
   authoredComments TicketComment[] @relation("AuthoredComments")
+  ticketHistory    TicketHistory[] @relation("TicketHistoryActor")
 
   sessionVersion Int @default(0)
 }
@@ -76,6 +86,7 @@ model Ticket {
   assignedTo User?           @relation("AssignedTickets", fields: [assignedToId], references: [id])
   category   Category?       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   comments   TicketComment[]
+  history    TicketHistory[]
 
   @@index([status])
   @@index([priority])
@@ -98,4 +109,21 @@ model TicketComment {
 
   @@index([ticketId, createdAt])
   @@index([authorId])
+}
+
+model TicketHistory {
+  id       String              @id
+  ticketId String
+  actorId  String
+  action   TicketHistoryAction
+  oldValue String?
+  newValue String?
+
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  actor  User   @relation("TicketHistoryActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt])
+  @@index([actorId])
 }
