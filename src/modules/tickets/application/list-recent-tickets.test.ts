@@ -87,4 +87,12 @@ describe("listRecentTickets", () => {
       }),
     );
   });
+
+  it("returns an empty list when no visible ticket exists", async () => {
+    mocks.findMany.mockResolvedValue([]);
+
+    await expect(
+      listRecentTickets({ id: "admin-1", role: UserRole.ADMIN }),
+    ).resolves.toEqual([]);
+  });
 });

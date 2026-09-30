@@ -81,4 +81,28 @@ describe("getTicketCategoryMetrics", () => {
       }),
     );
   });
+
+  it("keeps configured categories that do not contain tickets", async () => {
+    mocks.findMany.mockResolvedValue([
+      {
+        id: "category-access",
+        name: "Access",
+        _count: { tickets: 0 },
+      },
+    ]);
+
+    await expect(
+      getTicketCategoryMetrics({ id: "admin-1", role: UserRole.ADMIN }),
+    ).resolves.toEqual([
+      { id: "category-access", name: "Access", ticketCount: 0 },
+    ]);
+  });
+
+  it("returns an empty list when no category is configured", async () => {
+    mocks.findMany.mockResolvedValue([]);
+
+    await expect(
+      getTicketCategoryMetrics({ id: "admin-1", role: UserRole.ADMIN }),
+    ).resolves.toEqual([]);
+  });
 });

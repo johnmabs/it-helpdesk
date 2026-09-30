@@ -16,6 +16,8 @@ vi.mock("@/shared/database/prisma", () => ({
   },
 }));
 
+import { TicketPriority } from "../domain/ticket-priority";
+import { TicketStatus } from "../domain/ticket-status";
 import { getTicketSummaryMetrics } from "./get-ticket-summary-metrics";
 
 describe("getTicketSummaryMetrics", () => {
@@ -45,6 +47,27 @@ describe("getTicketSummaryMetrics", () => {
       critical: 1,
       resolvedToday: 5,
     });
+  });
+
+  it("queries each operational indicator with its expected filter", async () => {
+    await getTicketSummaryMetrics(
+      { id: "admin-1", role: UserRole.ADMIN },
+      new Date("2026-09-30T12:00:00Z"),
+    );
+
+    expect(mocks.count).toHaveBeenNthCalledWith(1, {
+      where: { status: TicketStatus.OPEN },
+    });
+    expect(mocks.count).toHaveBeenNthCalledWith(2, {
+      where: { status: TicketStatus.ASSIGNED },
+    });
+    expect(mocks.count).toHaveBeenNthCalledWith(3, {
+      where: { status: TicketStatus.IN_PROGRESS },
+    });
+    expect(mocks.count).toHaveBeenNthCalledWith(4, {
+      where: { priority: TicketPriority.CRITICAL },
+    });
+    expect(mocks.transaction).toHaveBeenCalledTimes(1);
   });
 
   it("limits every indicator to a standard user's tickets", async () => {

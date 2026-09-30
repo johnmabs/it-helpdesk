@@ -52,6 +52,34 @@ describe("getTechnicianWorkload", () => {
     }
   });
 
+  it("queries assigned and in-progress tickets in activity order", async () => {
+    await getTechnicianWorkload("technician-1");
+
+    expect(mocks.findMany).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        where: {
+          assignedToId: "technician-1",
+          status: TicketStatus.ASSIGNED,
+        },
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+        take: 5,
+      }),
+    );
+    expect(mocks.findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        where: {
+          assignedToId: "technician-1",
+          status: TicketStatus.IN_PROGRESS,
+        },
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+        take: 5,
+      }),
+    );
+    expect(mocks.transaction).toHaveBeenCalledTimes(1);
+  });
+
   it("includes resolved and closed tickets in the recently resolved view", async () => {
     await getTechnicianWorkload("technician-1");
 
@@ -70,6 +98,16 @@ describe("getTechnicianWorkload", () => {
         orderBy: [{ resolvedAt: "desc" }, { id: "desc" }],
       }),
     );
+  });
+
+  it("returns empty workload views when the technician has no tickets", async () => {
+    mocks.findMany.mockReset().mockResolvedValue([]);
+
+    await expect(getTechnicianWorkload("technician-1")).resolves.toEqual({
+      assigned: [],
+      inProgress: [],
+      recentlyResolved: [],
+    });
   });
 });
 
