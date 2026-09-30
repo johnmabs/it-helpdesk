@@ -1,16 +1,22 @@
 import Link from "next/link";
 
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
+import { getTechnicianWorkload } from "@/modules/tickets/application/get-technician-workload";
 import { getTicketSummaryMetrics } from "@/modules/tickets/application/get-ticket-summary-metrics";
 import { listRecentTickets } from "@/modules/tickets/application/list-recent-tickets";
+import { UserRole } from "@/modules/users/domain/user-role";
 
 import { logoutAction } from "./actions";
+import { TechnicianWorkloadView } from "./technician-workload";
 
 export default async function DashboardPage() {
   const user = await requireAuthenticatedUser();
-  const [metrics, recentTickets] = await Promise.all([
+  const [metrics, recentTickets, technicianWorkload] = await Promise.all([
     getTicketSummaryMetrics(user),
     listRecentTickets(user),
+    user.role === UserRole.TECHNICIAN
+      ? getTechnicianWorkload(user.id)
+      : Promise.resolve(null),
   ]);
 
   const summary = [
@@ -85,6 +91,10 @@ export default async function DashboardPage() {
           </table>
         )}
       </section>
+
+      {technicianWorkload ? (
+        <TechnicianWorkloadView workload={technicianWorkload} />
+      ) : null}
 
       <form action={logoutAction}>
         <button type="submit">Se déconnecter</button>
