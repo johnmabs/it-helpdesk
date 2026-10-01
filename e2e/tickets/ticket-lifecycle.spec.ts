@@ -12,6 +12,9 @@ test("a ticket follows the complete lifecycle", async ({ page }) => {
 
   await page.getByLabel("Priorité").selectOption("CRITICAL");
   await page.getByRole("button", { name: "Modifier la priorité" }).click();
+  await expect(
+    page.getByText("Priorité modifiée.", { exact: true }),
+  ).toBeVisible();
   await expectTicketStatus(page, "OPEN", "CRITICAL");
 
   const technicianSelect = page.getByLabel("Technicien");
@@ -23,15 +26,19 @@ test("a ticket follows the complete lifecycle", async ({ page }) => {
   expect(technicianId).toBeTruthy();
   await technicianSelect.selectOption(technicianId!);
   await page.getByRole("button", { name: "Assigner" }).click();
+  await expect(page.getByText("Ticket assigné.", { exact: true })).toBeVisible();
   await expectTicketStatus(page, "ASSIGNED", "CRITICAL");
 
   await page.getByRole("button", { name: "Commencer" }).click();
+  await expect(page.getByText("Ticket démarré.", { exact: true })).toBeVisible();
   await expectTicketStatus(page, "IN_PROGRESS", "CRITICAL");
 
   await page.getByRole("button", { name: "Résoudre" }).click();
+  await expect(page.getByText("Ticket résolu.", { exact: true })).toBeVisible();
   await expectTicketStatus(page, "RESOLVED", "CRITICAL");
 
   await page.getByRole("button", { name: "Clôturer" }).click();
+  await expect(page.getByText("Ticket clôturé.", { exact: true })).toBeVisible();
   await expectTicketStatus(page, "CLOSED", "CRITICAL");
 
   await expect(

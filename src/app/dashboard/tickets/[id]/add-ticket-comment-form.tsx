@@ -36,12 +36,16 @@ export function AddTicketCommentForm({ ticketId }: { ticketId: string }) {
           name="body"
           rows={4}
           required
-          aria-describedby={state.error ? "comment-form-error" : undefined}
+          aria-describedby={state.error ? "comment-form-feedback" : undefined}
           aria-invalid={Boolean(state.error)}
         />
       </FormField>
 
-      <FormFeedback id="comment-form-error" error={state.error} />
+      <FormFeedback
+        id="comment-form-feedback"
+        error={state.error}
+        message={state.submitted ? "Commentaire ajouté." : ""}
+      />
 
       <div className="form-actions">
         <SubmitButton pendingLabel="Publication...">

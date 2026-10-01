@@ -18,6 +18,9 @@ test("comments are displayed chronologically on a ticket", async ({
 
   await commentField.fill("Premier commentaire");
   await page.getByRole("button", { name: "Publier le commentaire" }).click();
+  await expect(
+    page.getByText("Commentaire ajouté.", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("Premier commentaire")).toBeVisible();
 
   await commentField.fill("Deuxième commentaire");

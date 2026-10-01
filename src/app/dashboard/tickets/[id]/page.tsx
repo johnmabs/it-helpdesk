@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { ActionFeedback } from "@/app/ui/action-feedback";
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import {
   canAssignTicket,
@@ -17,12 +18,16 @@ type PageProps = {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{
+    feedback?: string | string[];
+  }>;
 };
 
-export default async function TicketPage({ params }: PageProps) {
+export default async function TicketPage({ params, searchParams }: PageProps) {
   const user = await requireAuthenticatedUser();
 
   const { id } = await params;
+  const { feedback } = await searchParams;
 
   const ticket = await getTicketDetails(id);
 
@@ -40,6 +45,11 @@ export default async function TicketPage({ params }: PageProps) {
 
   return (
     <main>
+      <ActionFeedback
+        message={feedback === "ticket-created" ? "Ticket créé." : ""}
+        queryParameter="feedback"
+      />
+
       <header>
         <h1>{ticket.title}</h1>
 

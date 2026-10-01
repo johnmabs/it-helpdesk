@@ -100,6 +100,7 @@ import {
   closeTicketAction,
   resolveTicketAction,
   startTicketAction,
+  submitTicketAction,
 } from "./actions";
 
 const initialState = {
@@ -199,6 +200,29 @@ describe("ticket workflow actions", () => {
       technicianId: "technician-1",
       actorId: "actor-1",
     });
+  });
+
+  it("returns a success feedback after assignment", async () => {
+    const formData = new FormData();
+    formData.set("intent", "assign");
+    formData.set("ticketId", "ticket-1");
+    formData.set("technicianId", "technician-1");
+
+    await expect(
+      submitTicketAction({ error: "", message: "" }, formData),
+    ).resolves.toEqual({ error: "", message: "Ticket assigné." });
+  });
+
+  it("returns a generic feedback when an action fails", async () => {
+    mocks.assignExecute.mockRejectedValue(new Error("database unavailable"));
+    const formData = new FormData();
+    formData.set("intent", "assign");
+    formData.set("ticketId", "ticket-1");
+    formData.set("technicianId", "technician-1");
+
+    await expect(
+      submitTicketAction({ error: "", message: "" }, formData),
+    ).resolves.toEqual({ error: "Action impossible.", message: "" });
   });
 
   it.each([

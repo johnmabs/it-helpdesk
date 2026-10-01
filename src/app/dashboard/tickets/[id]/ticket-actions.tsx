@@ -1,15 +1,19 @@
+"use client";
+
+import { useActionState } from "react";
+
+import { FormFeedback } from "@/app/ui/form-feedback";
 import { FormField } from "@/app/ui/form-field";
 import { SubmitButton } from "@/app/ui/submit-button";
 import { TicketPriority } from "@/modules/tickets/domain/ticket-priority";
 import { UserRole } from "@/modules/users/domain/user-role";
 
-import {
-  assignTicketAction,
-  changeTicketPriorityAction,
-  closeTicketAction,
-  resolveTicketAction,
-  startTicketAction,
-} from "./actions";
+import { submitTicketAction } from "./actions";
+
+const initialState = {
+  error: "",
+  message: "",
+};
 
 type TicketActionsProps = {
   ticketId: string;
@@ -32,6 +36,7 @@ export function TicketActions({
   assignableUsers,
 }: TicketActionsProps) {
   const canManage = role === UserRole.ADMIN || role === UserRole.TECHNICIAN;
+  const [state, action] = useActionState(submitTicketAction, initialState);
 
   if (!canManage) {
     return null;
@@ -41,9 +46,16 @@ export function TicketActions({
     <section>
       <h2>Actions</h2>
 
+      <FormFeedback
+        id="ticket-action-feedback"
+        error={state.error}
+        message={state.message}
+      />
+
       {status !== "CLOSED" && status !== "CANCELLED" ? (
-        <form className="form-inline" action={changeTicketPriorityAction}>
+        <form className="form-inline" action={action}>
           <input type="hidden" name="ticketId" value={ticketId} />
+          <input type="hidden" name="intent" value="changePriority" />
 
           <FormField id="ticket-priority" label="Priorité">
             <select
@@ -66,8 +78,9 @@ export function TicketActions({
       ) : null}
 
       {status === "OPEN" ? (
-        <form className="form-inline" action={assignTicketAction}>
+        <form className="form-inline" action={action}>
           <input type="hidden" name="ticketId" value={ticketId} />
+          <input type="hidden" name="intent" value="assign" />
 
           <FormField id="technicianId" label="Technicien" required>
             <select
@@ -99,24 +112,27 @@ export function TicketActions({
       ) : null}
 
       {status === "ASSIGNED" ? (
-        <form className="form-inline" action={startTicketAction}>
+        <form className="form-inline" action={action}>
           <input type="hidden" name="ticketId" value={ticketId} />
+          <input type="hidden" name="intent" value="start" />
 
           <SubmitButton pendingLabel="Démarrage...">Commencer</SubmitButton>
         </form>
       ) : null}
 
       {status === "IN_PROGRESS" ? (
-        <form className="form-inline" action={resolveTicketAction}>
+        <form className="form-inline" action={action}>
           <input type="hidden" name="ticketId" value={ticketId} />
+          <input type="hidden" name="intent" value="resolve" />
 
           <SubmitButton pendingLabel="Résolution...">Résoudre</SubmitButton>
         </form>
       ) : null}
 
       {status === "RESOLVED" ? (
-        <form className="form-inline" action={closeTicketAction}>
+        <form className="form-inline" action={action}>
           <input type="hidden" name="ticketId" value={ticketId} />
+          <input type="hidden" name="intent" value="close" />
 
           <SubmitButton pendingLabel="Clôture...">Clôturer</SubmitButton>
         </form>

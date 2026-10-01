@@ -77,7 +77,7 @@ describe("createTicketAction", () => {
     ).rejects.toBe(redirectError);
 
     expect(mocks.redirect).toHaveBeenCalledWith(
-      "/dashboard/tickets/ticket-1",
+      "/dashboard/tickets/ticket-1?feedback=ticket-created",
     );
     expect(mocks.execute).toHaveBeenCalledWith(
       expect.objectContaining({ categoryId: "category-1" }),

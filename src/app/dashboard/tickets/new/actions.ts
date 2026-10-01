@@ -77,5 +77,5 @@ export async function createTicketAction(
     };
   }
 
-  redirect(`/dashboard/tickets/${result.id}`);
+  redirect(`/dashboard/tickets/${result.id}?feedback=ticket-created`);
 }

@@ -8,6 +8,7 @@ test("an administrator can create an open ticket", async ({ page }) => {
   await loginAsAdmin(page);
   await createTicket(page, title);
 
+  await expect(page.getByText("Ticket créé.", { exact: true })).toBeVisible();
   await expectTicketStatus(page, "OPEN");
   await expect(
     page.getByText("Description créée par le scénario de test de bout en bout."),

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import { canManageTickets } from "@/modules/auth/domain/permissions";
@@ -31,6 +32,21 @@ export type AddTicketCommentState = {
   error: string;
   submitted: boolean;
 };
+
+export type TicketActionState = {
+  error: string;
+  message: string;
+};
+
+const ticketActionMessages = {
+  assign: "Ticket assigné.",
+  changePriority: "Priorité modifiée.",
+  close: "Ticket clôturé.",
+  resolve: "Ticket résolu.",
+  start: "Ticket démarré.",
+} as const;
+
+type TicketActionIntent = keyof typeof ticketActionMessages;
 
 function createTicketHistoryRecorder(): TicketHistoryRecorder {
   return new TicketHistoryRecorder(
@@ -157,6 +173,49 @@ export async function changeTicketPriorityAction(formData: FormData) {
   revalidatePath(`/dashboard/tickets/${request.data.ticketId}`);
 }
 
+export async function submitTicketAction(
+  _previousState: TicketActionState,
+  formData: FormData,
+): Promise<TicketActionState> {
+  const intent = formData.get("intent");
+
+  try {
+    if (!isTicketActionIntent(intent)) {
+      throw new ValidationError("Invalid ticket action");
+    }
+
+    switch (intent) {
+      case "assign":
+        await assignTicketAction(formData);
+        break;
+      case "changePriority":
+        await changeTicketPriorityAction(formData);
+        break;
+      case "close":
+        await closeTicketAction(formData);
+        break;
+      case "resolve":
+        await resolveTicketAction(formData);
+        break;
+      case "start":
+        await startTicketAction(formData);
+        break;
+    }
+
+    return {
+      error: "",
+      message: ticketActionMessages[intent],
+    };
+  } catch (error) {
+    unstable_rethrow(error);
+
+    return {
+      error: "Action impossible.",
+      message: "",
+    };
+  }
+}
+
 export async function addTicketCommentAction(
   _previousState: AddTicketCommentState,
   formData: FormData,
@@ -214,4 +273,12 @@ export async function addTicketCommentAction(
     error: "",
     submitted: true,
   };
+}
+
+function isTicketActionIntent(
+  value: FormDataEntryValue | null,
+): value is TicketActionIntent {
+  return (
+    typeof value === "string" && Object.hasOwn(ticketActionMessages, value)
+  );
 }
