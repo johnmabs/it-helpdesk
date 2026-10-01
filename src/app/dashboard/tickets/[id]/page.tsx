@@ -51,7 +51,7 @@ export default async function TicketPage({ params, searchParams }: PageProps) {
         queryParameter="feedback"
       />
 
-      <header>
+      <header className="ticket-heading">
         <h1>{ticket.title}</h1>
 
         <p>
@@ -68,7 +68,7 @@ export default async function TicketPage({ params, searchParams }: PageProps) {
       <section>
         <h2>Informations</h2>
 
-        <dl>
+        <dl className="details-grid">
           <dt>Créé par</dt>
           <dd>{ticket.createdBy.name}</dd>
 
@@ -105,7 +105,7 @@ export default async function TicketPage({ params, searchParams }: PageProps) {
             description="Les échanges liés à ce ticket apparaîtront ici."
           />
         ) : (
-          <ol aria-label="Commentaires du ticket">
+          <ol className="comment-list" aria-label="Commentaires du ticket">
             {ticket.comments.map((comment) => (
               <li key={comment.id}>
                 <article>

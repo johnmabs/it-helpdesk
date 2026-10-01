@@ -19,7 +19,7 @@ export function TicketHistoryTimeline({
           description="Les modifications importantes du ticket apparaîtront ici."
         />
       ) : (
-        <ol aria-label="Historique du ticket">
+        <ol className="history-list" aria-label="Historique du ticket">
           {entries.map((entry) => (
             <li key={entry.id}>
               <time

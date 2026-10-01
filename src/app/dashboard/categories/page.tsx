@@ -20,7 +20,7 @@ export default async function CategoriesPage() {
 
   return (
     <main>
-      <header>
+      <header className="page-heading">
         <div>
           <Link href="/dashboard">Retour au tableau de bord</Link>
           <h1>Administration des catégories</h1>
@@ -41,7 +41,7 @@ export default async function CategoriesPage() {
             description="Utilisez le formulaire ci-dessus pour créer la première catégorie."
           />
         ) : (
-          <ul>
+          <ul className="entity-list">
             {categories.map((category) => (
               <li key={category.id}>
                 <UpdateCategoryForm category={category} />

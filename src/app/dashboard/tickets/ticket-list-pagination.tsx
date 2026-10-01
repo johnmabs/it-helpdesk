@@ -16,7 +16,7 @@ export function TicketListPagination({
   totalPages,
 }: TicketListPaginationProps) {
   return (
-    <nav aria-label="Pagination des tickets">
+    <nav className="ticket-pagination" aria-label="Pagination des tickets">
       <p>
         {total} ticket{total === 1 ? "" : "s"} — Page {page} sur {totalPages}
       </p>

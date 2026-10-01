@@ -36,7 +36,7 @@ export default async function TicketsPage({
 
   return (
     <main>
-      <div>
+      <div className="page-heading">
         <h1>Tickets</h1>
 
         <Link href="/dashboard/tickets/new">Nouveau ticket</Link>
@@ -141,40 +141,47 @@ export default async function TicketsPage({
           }
         />
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Titre</th>
-              <th>Priorité</th>
-              <th>Catégorie</th>
-              <th>Statut</th>
-              <th>Créé par</th>
-              <th>Assigné à</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {ticketPage.items.map((ticket) => (
-              <tr key={ticket.id}>
-                <td>
-                  <Link href={`/dashboard/tickets/${ticket.id}`}>
-                    {ticket.title}
-                  </Link>
-                </td>
-
-                <td>{ticket.priority}</td>
-                <td>{ticket.categoryName ?? "Non classé"}</td>
-                <td>{ticket.status}</td>
-                <td>{ticket.createdByName}</td>
-
-                <td>{ticket.assignedToName ?? "—"}</td>
-
-                <td>{ticket.createdAt.toLocaleString("fr-FR")}</td>
+        <div
+          className="table-scroll"
+          role="region"
+          aria-label="Liste des tickets"
+          tabIndex={0}
+        >
+          <table>
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Priorité</th>
+                <th>Catégorie</th>
+                <th>Statut</th>
+                <th>Créé par</th>
+                <th>Assigné à</th>
+                <th>Date</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {ticketPage.items.map((ticket) => (
+                <tr key={ticket.id}>
+                  <td>
+                    <Link href={`/dashboard/tickets/${ticket.id}`}>
+                      {ticket.title}
+                    </Link>
+                  </td>
+
+                  <td>{ticket.priority}</td>
+                  <td>{ticket.categoryName ?? "Non classé"}</td>
+                  <td>{ticket.status}</td>
+                  <td>{ticket.createdByName}</td>
+
+                  <td>{ticket.assignedToName ?? "—"}</td>
+
+                  <td>{ticket.createdAt.toLocaleString("fr-FR")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <TicketListPagination

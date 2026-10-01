@@ -59,7 +59,7 @@ function WorkloadList({
       {tickets.length === 0 ? (
         <EmptyState title={emptyMessage} />
       ) : (
-        <ul>
+        <ul className="workload-list">
           {tickets.map((ticket) => {
             const activityDate =
               showResolvedAt && ticket.resolvedAt

@@ -37,7 +37,7 @@ export default async function DashboardPage() {
       <section aria-labelledby="ticket-summary-heading">
         <h2 id="ticket-summary-heading">Activité des tickets</h2>
 
-        <dl>
+        <dl className="metric-grid summary-metrics">
           {summary.map((metric) => (
             <div key={metric.label}>
               <dt>{metric.label}</dt>
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
             description="Les indicateurs apparaîtront dès qu’une catégorie sera disponible."
           />
         ) : (
-          <dl>
+          <dl className="metric-grid category-metrics">
             {categoryMetrics.map((metric) => (
               <div key={metric.id}>
                 <dt>
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
       </section>
 
       <section aria-labelledby="recent-tickets-heading">
-        <div>
+        <div className="section-heading">
           <h2 id="recent-tickets-heading">Tickets récents</h2>
           <Link href="/dashboard/tickets">Voir tous les tickets</Link>
         </div>
@@ -91,46 +91,52 @@ export default async function DashboardPage() {
             }
           />
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Titre</th>
-                <th>Priorité</th>
-                <th>Catégorie</th>
-                <th>Statut</th>
-                <th>Assigné à</th>
-                <th>Dernière activité</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {recentTickets.map((ticket) => (
-                <tr key={ticket.id}>
-                  <td>
-                    <Link href={`/dashboard/tickets/${ticket.id}`}>
-                      {ticket.title}
-                    </Link>
-                  </td>
-                  <td>{ticket.priority}</td>
-                  <td>{ticket.categoryName ?? "Non classé"}</td>
-                  <td>{ticket.status}</td>
-                  <td>{ticket.assignedToName ?? "—"}</td>
-                  <td>
-                    <time dateTime={ticket.updatedAt.toISOString()}>
-                      {ticket.updatedAt.toLocaleString("fr-FR")}
-                    </time>
-                  </td>
+          <div
+            className="table-scroll"
+            role="region"
+            aria-label="Tickets récents"
+            tabIndex={0}
+          >
+            <table>
+              <thead>
+                <tr>
+                  <th>Titre</th>
+                  <th>Priorité</th>
+                  <th>Catégorie</th>
+                  <th>Statut</th>
+                  <th>Assigné à</th>
+                  <th>Dernière activité</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {recentTickets.map((ticket) => (
+                  <tr key={ticket.id}>
+                    <td>
+                      <Link href={`/dashboard/tickets/${ticket.id}`}>
+                        {ticket.title}
+                      </Link>
+                    </td>
+                    <td>{ticket.priority}</td>
+                    <td>{ticket.categoryName ?? "Non classé"}</td>
+                    <td>{ticket.status}</td>
+                    <td>{ticket.assignedToName ?? "—"}</td>
+                    <td>
+                      <time dateTime={ticket.updatedAt.toISOString()}>
+                        {ticket.updatedAt.toLocaleString("fr-FR")}
+                      </time>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
       {technicianWorkload ? (
         <TechnicianWorkloadView workload={technicianWorkload} />
       ) : null}
-
     </main>
   );
 }
