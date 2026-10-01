@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { EmptyState } from "@/app/ui/empty-state";
 import type {
   TechnicianWorkload,
   TechnicianWorkloadTicket,
@@ -56,7 +57,7 @@ function WorkloadList({
       <h3 id={headingId}>{heading}</h3>
 
       {tickets.length === 0 ? (
-        <p>{emptyMessage}</p>
+        <EmptyState title={emptyMessage} />
       ) : (
         <ul>
           {tickets.map((ticket) => {

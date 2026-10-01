@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { EmptyState } from "@/app/ui/empty-state";
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import { getTechnicianWorkload } from "@/modules/tickets/application/get-technician-workload";
 import { getTicketCategoryMetrics } from "@/modules/tickets/application/get-ticket-category-metrics";
@@ -50,7 +51,10 @@ export default async function DashboardPage() {
         <h2 id="category-metrics-heading">Tickets par catégorie</h2>
 
         {categoryMetrics.length === 0 ? (
-          <p>Aucune catégorie configurée.</p>
+          <EmptyState
+            title="Aucune catégorie configurée."
+            description="Les indicateurs apparaîtront dès qu’une catégorie sera disponible."
+          />
         ) : (
           <dl>
             {categoryMetrics.map((metric) => (
@@ -74,7 +78,18 @@ export default async function DashboardPage() {
         </div>
 
         {recentTickets.length === 0 ? (
-          <p>Aucun ticket récent.</p>
+          <EmptyState
+            title="Aucun ticket récent."
+            description="Les derniers tickets créés ou modifiés apparaîtront ici."
+            action={
+              <Link
+                className="button button-primary"
+                href="/dashboard/tickets/new"
+              >
+                Créer un ticket
+              </Link>
+            }
+          />
         ) : (
           <table>
             <thead>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { EmptyState } from "@/app/ui/empty-state";
 import { ListCategories } from "@/modules/categories/application/list-categories";
 import { PrismaCategoryRepository } from "@/modules/categories/infrastructure/persistence/prisma-category-repository";
 
@@ -35,7 +36,10 @@ export default async function CategoriesPage() {
         <h2>Catégories</h2>
 
         {categories.length === 0 ? (
-          <p>Aucune catégorie pour le moment.</p>
+          <EmptyState
+            title="Aucune catégorie pour le moment."
+            description="Utilisez le formulaire ci-dessus pour créer la première catégorie."
+          />
         ) : (
           <ul>
             {categories.map((category) => (

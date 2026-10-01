@@ -16,9 +16,12 @@ test("denies dashboard access to an anonymous user", async ({ page }) => {
 test("denies administration access to a standard user", async ({ page }) => {
   await loginAsRequester(page);
 
-  const response = await page.goto("/admin/categories");
+  await page.goto("/admin/categories");
 
-  expect(response?.status()).toBe(404);
+  await expect(page).toHaveURL(/\/access-denied$/);
+  await expect(
+    page.getByRole("heading", { name: "Accès refusé" }),
+  ).toBeVisible();
 });
 
 test("denies ticket assignment to a standard user", async ({ page }) => {
@@ -32,7 +35,10 @@ test("denies ticket assignment to a standard user", async ({ page }) => {
 test("denies user administration access to a technician", async ({ page }) => {
   await loginAsTechnician(page);
 
-  const response = await page.goto("/dashboard/users");
+  await page.goto("/dashboard/users");
 
-  expect(response?.status()).toBe(404);
+  await expect(page).toHaveURL(/\/access-denied$/);
+  await expect(
+    page.getByRole("heading", { name: "Accès refusé" }),
+  ).toBeVisible();
 });

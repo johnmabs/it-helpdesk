@@ -1,3 +1,4 @@
+import { EmptyState } from "@/app/ui/empty-state";
 import type { TicketHistoryListItem } from "@/modules/tickets/application/list-ticket-history";
 import { TicketHistoryAction } from "@/modules/tickets/domain/ticket-history-action";
 
@@ -13,7 +14,10 @@ export function TicketHistoryTimeline({
       <h2>Historique</h2>
 
       {entries.length === 0 ? (
-        <p>Aucun événement enregistré.</p>
+        <EmptyState
+          title="Aucun événement enregistré."
+          description="Les modifications importantes du ticket apparaîtront ici."
+        />
       ) : (
         <ol aria-label="Historique du ticket">
           {entries.map((entry) => (

@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { UserRole } from "@/modules/users/domain/user-role";
 
 const mocks = vi.hoisted(() => ({
-  notFound: vi.fn(),
+  redirect: vi.fn(),
   requireAuthenticatedUser: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
-  notFound: mocks.notFound,
+  redirect: mocks.redirect,
 }));
 
 vi.mock("@/modules/auth/application/require-authenticated-user", () => ({
@@ -20,8 +20,8 @@ import { requireCategoryAdministrator } from "./require-category-administrator";
 describe("requireCategoryAdministrator", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.notFound.mockImplementation(() => {
-      throw new Error("NEXT_NOT_FOUND");
+    mocks.redirect.mockImplementation(() => {
+      throw new Error("NEXT_REDIRECT");
     });
   });
 
@@ -33,7 +33,7 @@ describe("requireCategoryAdministrator", () => {
     });
 
     await expect(requireCategoryAdministrator()).resolves.toBeUndefined();
-    expect(mocks.notFound).not.toHaveBeenCalled();
+    expect(mocks.redirect).not.toHaveBeenCalled();
   });
 
   it.each([UserRole.USER, UserRole.TECHNICIAN])(
@@ -46,9 +46,9 @@ describe("requireCategoryAdministrator", () => {
       });
 
       await expect(requireCategoryAdministrator()).rejects.toThrow(
-        "NEXT_NOT_FOUND",
+        "NEXT_REDIRECT",
       );
-      expect(mocks.notFound).toHaveBeenCalledOnce();
+      expect(mocks.redirect).toHaveBeenCalledWith("/access-denied");
     },
   );
 });

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { EmptyState } from "@/app/ui/empty-state";
 import { FormField } from "@/app/ui/form-field";
 import { SubmitButton } from "@/app/ui/submit-button";
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
@@ -127,7 +128,18 @@ export default async function TicketsPage({
       </form>
 
       {ticketPage.items.length === 0 ? (
-        <p>Aucun ticket ne correspond aux filtres.</p>
+        <EmptyState
+          title="Aucun ticket trouvé"
+          description="Aucun ticket ne correspond aux filtres sélectionnés."
+          action={
+            <Link
+              className="button button-secondary"
+              href="/dashboard/tickets"
+            >
+              Réinitialiser les filtres
+            </Link>
+          }
+        />
       ) : (
         <table>
           <thead>

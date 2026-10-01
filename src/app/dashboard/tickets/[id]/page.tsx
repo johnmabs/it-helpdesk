@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ActionFeedback } from "@/app/ui/action-feedback";
+import { EmptyState } from "@/app/ui/empty-state";
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import {
   canAssignTicket,
@@ -99,7 +100,10 @@ export default async function TicketPage({ params, searchParams }: PageProps) {
         <h2>Commentaires</h2>
 
         {ticket.comments.length === 0 ? (
-          <p>Aucun commentaire pour le moment.</p>
+          <EmptyState
+            title="Aucun commentaire pour le moment."
+            description="Les échanges liés à ce ticket apparaîtront ici."
+          />
         ) : (
           <ol aria-label="Commentaires du ticket">
             {ticket.comments.map((comment) => (
