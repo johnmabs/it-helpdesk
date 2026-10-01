@@ -22,6 +22,14 @@ test("denies administration access to a standard user", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Accès refusé" }),
   ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Vous ne disposez pas des permissions nécessaires pour consulter cette page.",
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Retour au dashboard" }),
+  ).toBeVisible();
 });
 
 test("denies ticket assignment to a standard user", async ({ page }) => {

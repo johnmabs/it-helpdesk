@@ -17,4 +17,10 @@ test("shows the not-found state for an unknown page", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Page introuvable" }),
   ).toBeVisible();
+  await expect(
+    page.getByText("La page demandée n’existe pas ou n’est plus disponible."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Retour au dashboard" }),
+  ).toBeVisible();
 });
