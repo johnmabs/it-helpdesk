@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { FormField } from "@/app/ui/form-field";
+import { SubmitButton } from "@/app/ui/submit-button";
 import { requireAuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import { getTicketFilterOptions } from "@/modules/tickets/application/get-ticket-filter-options";
 import {
@@ -39,9 +41,8 @@ export default async function TicketsPage({
         <Link href="/dashboard/tickets/new">Nouveau ticket</Link>
       </div>
 
-      <form method="get">
-        <div>
-          <label htmlFor="status">Statut</label>
+      <form className="filter-form" method="get">
+        <FormField id="status" label="Statut">
           <select
             id="status"
             name="status"
@@ -54,10 +55,9 @@ export default async function TicketsPage({
               </option>
             ))}
           </select>
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="priority">Priorité</label>
+        <FormField id="priority" label="Priorité">
           <select
             id="priority"
             name="priority"
@@ -70,10 +70,9 @@ export default async function TicketsPage({
               </option>
             ))}
           </select>
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="category">Catégorie</label>
+        <FormField id="category" label="Catégorie">
           <select
             id="category"
             name="category"
@@ -86,10 +85,9 @@ export default async function TicketsPage({
               </option>
             ))}
           </select>
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="assignee">Technicien assigné</label>
+        <FormField id="assignee" label="Technicien assigné">
           <select
             id="assignee"
             name="assignee"
@@ -103,10 +101,9 @@ export default async function TicketsPage({
               </option>
             ))}
           </select>
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="creator">Créateur</label>
+        <FormField id="creator" label="Créateur">
           <select
             id="creator"
             name="creator"
@@ -119,10 +116,14 @@ export default async function TicketsPage({
               </option>
             ))}
           </select>
-        </div>
+        </FormField>
 
-        <button type="submit">Filtrer</button>
-        <Link href="/dashboard/tickets">Réinitialiser</Link>
+        <div className="form-actions filter-actions">
+          <SubmitButton pendingLabel="Filtrage...">Filtrer</SubmitButton>
+          <Link className="button button-ghost" href="/dashboard/tickets">
+            Réinitialiser
+          </Link>
+        </div>
       </form>
 
       {ticketPage.items.length === 0 ? (

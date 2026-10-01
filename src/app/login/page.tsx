@@ -11,10 +11,16 @@ export default async function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>Connexion</h1>
+    <main className="login-page">
+      <section className="login-panel">
+        <p className="login-eyebrow">IT Helpdesk</p>
+        <h1>Connexion</h1>
+        <p className="login-description">
+          Accédez à votre espace de gestion des demandes.
+        </p>
 
-      <LoginForm />
+        <LoginForm />
+      </section>
     </main>
   );
 }

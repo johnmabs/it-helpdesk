@@ -317,22 +317,14 @@ textarea {
   margin-top: 0.55rem;
 }
 
-.user-menu-panel button {
+.user-menu-panel .button {
   width: 100%;
-  padding: 0.55rem 0.65rem;
-  border: 0;
-  border-radius: 0.5rem;
-  background: transparent;
-  color: #b42318;
-  cursor: pointer;
-  font-weight: 650;
-  text-align: left;
+  justify-content: flex-start;
 }
 
-.user-menu-panel button:hover,
-.user-menu-panel button:focus-visible {
+.user-menu-panel .button:hover,
+.user-menu-panel .button:focus-visible {
   background: #fff0ee;
-  outline: none;
 }
 
 .app-content {
@@ -370,6 +362,254 @@ textarea {
   border-radius: 0.9rem;
   background: var(--app-surface);
   box-shadow: 0 1px 2px rgb(15 23 42 / 3%);
+}
+
+.form-stack {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.form-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.8rem;
+}
+
+.app-content section > .form-inline + .form-inline {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.filter-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  align-items: end;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.9rem;
+  background: var(--app-surface);
+}
+
+.form-field {
+  min-width: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.form-field label {
+  color: #344054;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.form-required {
+  margin-left: 0.2rem;
+  color: #b42318;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  min-height: 2.65rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.58rem;
+  background: var(--app-surface);
+  color: var(--app-ink);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.form-field textarea {
+  resize: vertical;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: #98a2b3;
+}
+
+.form-field input:hover,
+.form-field select:hover,
+.form-field textarea:hover {
+  border-color: #98a7ba;
+}
+
+.form-field input:focus-visible,
+.form-field select:focus-visible,
+.form-field textarea:focus-visible {
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 0.2rem rgb(49 87 213 / 13%);
+}
+
+.form-field input[aria-invalid="true"],
+.form-field select[aria-invalid="true"],
+.form-field textarea[aria-invalid="true"] {
+  border-color: #d92d20;
+}
+
+.form-field input:disabled,
+.form-field select:disabled,
+.form-field textarea:disabled {
+  background: #f2f4f7;
+  color: #667085;
+  cursor: not-allowed;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.filter-actions {
+  align-self: end;
+}
+
+.button {
+  min-height: 2.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.58rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: 0.58rem;
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: background-color 150ms ease, border-color 150ms ease,
+    box-shadow 150ms ease, color 150ms ease;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.button-primary {
+  background: var(--app-primary);
+  color: white;
+}
+
+.button-primary:hover:not(:disabled) {
+  background: #2447bd;
+}
+
+.button-secondary {
+  border-color: #cbd5e1;
+  background: var(--app-surface);
+  color: #344054;
+}
+
+.button-secondary:hover:not(:disabled),
+.button-ghost:hover {
+  border-color: #aebacc;
+  background: #f8fafc;
+}
+
+.button-danger {
+  border-color: #fecdca;
+  background: #fff6f5;
+  color: #b42318;
+}
+
+.button-danger:hover:not(:disabled) {
+  background: #fee4e2;
+}
+
+.button-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--app-muted);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.button-spinner {
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: button-spin 700ms linear infinite;
+}
+
+.form-feedback {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid;
+  border-radius: 0.58rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.form-feedback-error {
+  border-color: #fecdca;
+  background: #fff6f5;
+  color: #912018;
+}
+
+.form-feedback-success {
+  border-color: #a6f4c5;
+  background: #ecfdf3;
+  color: #05603a;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background:
+    radial-gradient(circle at 15% 15%, rgb(96 125 255 / 16%), transparent 28rem),
+    var(--app-background);
+}
+
+.login-panel {
+  width: min(100%, 28rem);
+  padding: clamp(1.5rem, 5vw, 2.25rem);
+  border: 1px solid var(--app-border);
+  border-radius: 1rem;
+  background: var(--app-surface);
+  box-shadow: 0 24px 60px rgb(15 23 42 / 10%);
+}
+
+.login-panel h1 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -0.035em;
+}
+
+.login-eyebrow {
+  margin: 0 0 0.55rem;
+  color: var(--app-primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.login-description {
+  margin: 0.45rem 0 1.5rem;
+  color: var(--app-muted);
+  font-size: 0.9rem;
+}
+
+@keyframes button-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 800px) {

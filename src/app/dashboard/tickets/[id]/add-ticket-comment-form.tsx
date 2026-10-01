@@ -2,6 +2,10 @@
 
 import { useActionState, useEffect, useRef } from "react";
 
+import { FormFeedback } from "@/app/ui/form-feedback";
+import { FormField } from "@/app/ui/form-field";
+import { SubmitButton } from "@/app/ui/submit-button";
+
 import { addTicketCommentAction } from "./actions";
 
 const initialState = {
@@ -11,7 +15,7 @@ const initialState = {
 
 export function AddTicketCommentForm({ ticketId }: { ticketId: string }) {
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, action, pending] = useActionState(
+  const [state, action] = useActionState(
     addTicketCommentAction,
     initialState,
   );
@@ -23,24 +27,27 @@ export function AddTicketCommentForm({ ticketId }: { ticketId: string }) {
   }, [state]);
 
   return (
-    <form ref={formRef} action={action}>
+    <form ref={formRef} className="form-stack" action={action}>
       <input type="hidden" name="ticketId" value={ticketId} />
 
-      <label htmlFor="comment-body">Ajouter un commentaire</label>
+      <FormField id="comment-body" label="Ajouter un commentaire" required>
+        <textarea
+          id="comment-body"
+          name="body"
+          rows={4}
+          required
+          aria-describedby={state.error ? "comment-form-error" : undefined}
+          aria-invalid={Boolean(state.error)}
+        />
+      </FormField>
 
-      <textarea
-        id="comment-body"
-        name="body"
-        rows={4}
-        required
-        disabled={pending}
-      />
+      <FormFeedback id="comment-form-error" error={state.error} />
 
-      {state.error ? <p role="alert">{state.error}</p> : null}
-
-      <button type="submit" disabled={pending}>
-        {pending ? "Publication..." : "Publier le commentaire"}
-      </button>
+      <div className="form-actions">
+        <SubmitButton pendingLabel="Publication...">
+          Publier le commentaire
+        </SubmitButton>
+      </div>
     </form>
   );
 }

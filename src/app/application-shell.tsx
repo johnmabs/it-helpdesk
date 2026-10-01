@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { SubmitButton } from "@/app/ui/submit-button";
 import type { AuthenticatedUser } from "@/modules/auth/application/require-authenticated-user";
 import {
   canManageCategories,
@@ -95,7 +96,9 @@ export function ApplicationShell({ children, user }: ApplicationShellProps) {
                   <span>{roleLabels[user.role]}</span>
                 </div>
                 <form action={logoutAction}>
-                  <button type="submit">Se déconnecter</button>
+                  <SubmitButton pendingLabel="Déconnexion..." variant="danger">
+                    Se déconnecter
+                  </SubmitButton>
                 </form>
               </div>
             </details>

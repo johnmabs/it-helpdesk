@@ -2,6 +2,10 @@
 
 import { useActionState } from "react";
 
+import { FormFeedback } from "@/app/ui/form-feedback";
+import { FormField } from "@/app/ui/form-field";
+import { SubmitButton } from "@/app/ui/submit-button";
+
 import { loginAction } from "./actions";
 
 const initialState = {
@@ -9,27 +13,39 @@ const initialState = {
 };
 
 export function LoginForm() {
-  const [state, action, pending] = useActionState(loginAction, initialState);
+  const [state, action] = useActionState(loginAction, initialState);
 
   return (
-    <form action={action}>
-      <div>
-        <label htmlFor="email">Email</label>
+    <form className="form-stack" action={action}>
+      <FormField id="email" label="Email" required>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          aria-describedby={state.error ? "login-error" : undefined}
+          aria-invalid={Boolean(state.error)}
+        />
+      </FormField>
 
-        <input id="email" name="email" type="email" required />
+      <FormField id="password" label="Mot de passe" required>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+          aria-describedby={state.error ? "login-error" : undefined}
+          aria-invalid={Boolean(state.error)}
+        />
+      </FormField>
+
+      <FormFeedback id="login-error" error={state.error} />
+
+      <div className="form-actions">
+        <SubmitButton pendingLabel="Connexion...">Se connecter</SubmitButton>
       </div>
-
-      <div>
-        <label htmlFor="password">Mot de passe</label>
-
-        <input id="password" name="password" type="password" required />
-      </div>
-
-      {state.error ? <p role="alert">{state.error}</p> : null}
-
-      <button type="submit" disabled={pending}>
-        {pending ? "Connexion..." : "Se connecter"}
-      </button>
     </form>
   );
 }

@@ -2,6 +2,9 @@
 
 import { useActionState } from "react";
 
+import { FormFeedback } from "@/app/ui/form-feedback";
+import { FormField } from "@/app/ui/form-field";
+import { SubmitButton } from "@/app/ui/submit-button";
 import type { CategoryOutput } from "@/modules/categories/application/category-output";
 
 import { createTicketAction } from "./actions";
@@ -15,34 +18,47 @@ export function CreateTicketForm({
 }: {
   categories: CategoryOutput[];
 }) {
-  const [state, action, pending] = useActionState(
-    createTicketAction,
-    initialState,
-  );
+  const [state, action] = useActionState(createTicketAction, initialState);
+  const categoryErrorId =
+    categories.length === 0
+      ? "category-unavailable-error"
+      : state.error
+        ? "ticket-form-error"
+        : undefined;
 
   return (
-    <form action={action}>
-      <div>
-        <label htmlFor="title">Titre</label>
+    <form className="form-stack" action={action}>
+      <FormField id="title" label="Titre" required>
+        <input
+          id="title"
+          name="title"
+          type="text"
+          required
+          aria-describedby={state.error ? "ticket-form-error" : undefined}
+          aria-invalid={Boolean(state.error)}
+        />
+      </FormField>
 
-        <input id="title" name="title" type="text" required />
-      </div>
+      <FormField id="description" label="Description" required>
+        <textarea
+          id="description"
+          name="description"
+          required
+          rows={6}
+          aria-describedby={state.error ? "ticket-form-error" : undefined}
+          aria-invalid={Boolean(state.error)}
+        />
+      </FormField>
 
-      <div>
-        <label htmlFor="description">Description</label>
-
-        <textarea id="description" name="description" required rows={6} />
-      </div>
-
-      <div>
-        <label htmlFor="categoryId">Catégorie</label>
-
+      <FormField id="categoryId" label="Catégorie" required>
         <select
           id="categoryId"
           name="categoryId"
           defaultValue=""
           required
           disabled={categories.length === 0}
+          aria-describedby={categoryErrorId}
+          aria-invalid={categories.length === 0 || Boolean(state.error)}
         >
           <option value="" disabled>
             Sélectionner une catégorie
@@ -54,19 +70,23 @@ export function CreateTicketForm({
             </option>
           ))}
         </select>
-      </div>
+      </FormField>
 
       {categories.length === 0 ? (
-        <p role="alert">
-          Aucune catégorie active. Contactez un administrateur avant de créer
-          un ticket.
-        </p>
+        <FormFeedback
+          id="category-unavailable-error"
+          error="Aucune catégorie active. Contactez un administrateur avant de créer un ticket."
+        />
       ) : null}
 
-      <div>
-        <label htmlFor="priority">Priorité</label>
-
-        <select id="priority" name="priority" defaultValue="MEDIUM">
+      <FormField id="priority" label="Priorité">
+        <select
+          id="priority"
+          name="priority"
+          defaultValue="MEDIUM"
+          aria-describedby={state.error ? "ticket-form-error" : undefined}
+          aria-invalid={Boolean(state.error)}
+        >
           <option value="LOW">Faible</option>
 
           <option value="MEDIUM">Moyenne</option>
@@ -75,13 +95,18 @@ export function CreateTicketForm({
 
           <option value="CRITICAL">Critique</option>
         </select>
+      </FormField>
+
+      <FormFeedback id="ticket-form-error" error={state.error} />
+
+      <div className="form-actions">
+        <SubmitButton
+          pendingLabel="Création..."
+          disabled={categories.length === 0}
+        >
+          Créer le ticket
+        </SubmitButton>
       </div>
-
-      {state.error ? <p role="alert">{state.error}</p> : null}
-
-      <button type="submit" disabled={pending || categories.length === 0}>
-        {pending ? "Création..." : "Créer le ticket"}
-      </button>
     </form>
   );
 }

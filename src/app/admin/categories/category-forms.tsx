@@ -2,6 +2,9 @@
 
 import { useActionState } from "react";
 
+import { FormFeedback } from "@/app/ui/form-feedback";
+import { FormField } from "@/app/ui/form-field";
+import { SubmitButton } from "@/app/ui/submit-button";
 import type { CategoryOutput } from "@/modules/categories/application/category-output";
 
 import {
@@ -17,69 +20,88 @@ const initialState: CategoryActionState = {
 };
 
 export function CreateCategoryForm() {
-  const [state, action, pending] = useActionState(
+  const [state, action] = useActionState(
     createCategoryAction,
     initialState,
   );
 
   return (
-    <form action={action}>
-      <div>
-        <label htmlFor="new-category-name">Nom</label>
-        <input id="new-category-name" name="name" required />
-      </div>
+    <form className="form-stack" action={action}>
+      <FormField id="new-category-name" label="Nom" required>
+        <input
+          id="new-category-name"
+          name="name"
+          required
+          aria-describedby={state.error ? "create-category-feedback" : undefined}
+          aria-invalid={Boolean(state.error)}
+        />
+      </FormField>
 
-      <div>
-        <label htmlFor="new-category-description">Description</label>
+      <FormField id="new-category-description" label="Description">
         <textarea id="new-category-description" name="description" rows={3} />
+      </FormField>
+
+      <FormFeedback
+        id="create-category-feedback"
+        error={state.error}
+        message={state.message}
+      />
+
+      <div className="form-actions">
+        <SubmitButton pendingLabel="Création...">
+          Créer la catégorie
+        </SubmitButton>
       </div>
-
-      <ActionFeedback state={state} />
-
-      <button type="submit" disabled={pending}>
-        {pending ? "Création..." : "Créer la catégorie"}
-      </button>
     </form>
   );
 }
 
 export function UpdateCategoryForm({ category }: { category: CategoryOutput }) {
-  const [state, action, pending] = useActionState(
+  const [state, action] = useActionState(
     updateCategoryAction,
     initialState,
   );
 
   return (
-    <form action={action}>
+    <form className="form-stack" action={action}>
       <input type="hidden" name="categoryId" value={category.id} />
 
-      <div>
-        <label htmlFor={`category-name-${category.id}`}>Nom</label>
+      <FormField id={`category-name-${category.id}`} label="Nom" required>
         <input
           id={`category-name-${category.id}`}
           name="name"
           defaultValue={category.name}
           required
+          aria-describedby={
+            state.error ? `category-feedback-${category.id}` : undefined
+          }
+          aria-invalid={Boolean(state.error)}
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor={`category-description-${category.id}`}>
-          Description
-        </label>
+      <FormField
+        id={`category-description-${category.id}`}
+        label="Description"
+      >
         <textarea
           id={`category-description-${category.id}`}
           name="description"
           defaultValue={category.description ?? ""}
           rows={2}
         />
+      </FormField>
+
+      <FormFeedback
+        id={`category-feedback-${category.id}`}
+        error={state.error}
+        message={state.message}
+      />
+
+      <div className="form-actions">
+        <SubmitButton pendingLabel="Enregistrement...">
+          Enregistrer
+        </SubmitButton>
       </div>
-
-      <ActionFeedback state={state} />
-
-      <button type="submit" disabled={pending}>
-        {pending ? "Enregistrement..." : "Enregistrer"}
-      </button>
     </form>
   );
 }
@@ -89,33 +111,29 @@ export function DeactivateCategoryForm({
 }: {
   category: CategoryOutput;
 }) {
-  const [state, action, pending] = useActionState(
+  const [state, action] = useActionState(
     deactivateCategoryAction,
     initialState,
   );
 
   return (
     <div>
-      <ActionFeedback state={state} />
+      <FormFeedback
+        id={`deactivate-category-feedback-${category.id}`}
+        error={state.error}
+        message={state.message}
+      />
 
       {category.active ? (
         <form action={action}>
           <input type="hidden" name="categoryId" value={category.id} />
-          <button type="submit" disabled={pending}>
-            {pending ? "Désactivation..." : "Désactiver"}
-          </button>
+          <SubmitButton pendingLabel="Désactivation..." variant="danger">
+            Désactiver
+          </SubmitButton>
         </form>
       ) : (
         <p>Catégorie inactive</p>
       )}
     </div>
   );
-}
-
-function ActionFeedback({ state }: { state: CategoryActionState }) {
-  if (state.error) {
-    return <p role="alert">{state.error}</p>;
-  }
-
-  return state.message ? <p role="status">{state.message}</p> : null;
 }
