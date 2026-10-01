@@ -18,7 +18,7 @@ describe("authentication route protection", () => {
     const authorized = authConfig.callbacks.authorized({
       auth: null,
       request: {
-        nextUrl: new URL("http://localhost/admin/categories"),
+        nextUrl: new URL("http://localhost/dashboard/categories"),
       },
     } as never);
 

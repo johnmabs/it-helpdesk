@@ -8,9 +8,7 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const isProtectedRoute =
         nextUrl.pathname === "/dashboard" ||
-        nextUrl.pathname.startsWith("/dashboard/") ||
-        nextUrl.pathname === "/admin" ||
-        nextUrl.pathname.startsWith("/admin/");
+        nextUrl.pathname.startsWith("/dashboard/");
 
       if (isProtectedRoute) {
         return Boolean(auth?.user);

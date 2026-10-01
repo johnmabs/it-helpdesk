@@ -32,7 +32,7 @@ export function ApplicationShell({ children, user }: ApplicationShellProps) {
     { href: "/dashboard/tickets", label: "Tickets" },
     { href: "/dashboard/tickets/new", label: "Nouveau ticket", exact: true },
     ...(canManageCategories(user.role)
-      ? [{ href: "/admin/categories", label: "Catégories" }]
+      ? [{ href: "/dashboard/categories", label: "Catégories" }]
       : []),
     ...(canManageUsers(user.role)
       ? [{ href: "/dashboard/users", label: "Utilisateurs" }]

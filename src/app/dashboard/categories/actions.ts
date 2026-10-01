@@ -20,7 +20,7 @@ export type CategoryActionState = {
   message: string;
 };
 
-const categoriesPath = "/admin/categories";
+const categoriesPath = "/dashboard/categories";
 
 export async function createCategoryAction(
   _previousState: CategoryActionState,

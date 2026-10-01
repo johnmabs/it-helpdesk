@@ -16,7 +16,7 @@ test("denies dashboard access to an anonymous user", async ({ page }) => {
 test("denies administration access to a standard user", async ({ page }) => {
   await loginAsRequester(page);
 
-  await page.goto("/admin/categories");
+  await page.goto("/dashboard/categories");
 
   await expect(page).toHaveURL(/\/access-denied$/);
   await expect(
