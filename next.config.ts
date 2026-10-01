@@ -73,6 +73,7 @@ export function createSecurityHeaders(environment: Environment) {
 }
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   poweredByHeader: false,
   reactCompiler: true,
   async headers() {
