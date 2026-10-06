@@ -1,12 +1,31 @@
 services:
+  app:
+    build:
+      context: .
+      target: runner
+
+    environment:
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
+      AUTH_TRUST_HOST: "true"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-helpdesk}:${POSTGRES_PASSWORD:-helpdesk}@postgres:5432/${POSTGRES_DB:-it_helpdesk}?sslmode=disable
+
+    ports:
+      - "${APP_PORT:-3000}:3000"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    restart: unless-stopped
+
   postgres:
     image: postgres:18-alpine
     container_name: it-helpdesk-postgres
 
     environment:
-      POSTGRES_DB: it_helpdesk
-      POSTGRES_USER: helpdesk
-      POSTGRES_PASSWORD: helpdesk
+      POSTGRES_DB: ${POSTGRES_DB:-it_helpdesk}
+      POSTGRES_USER: ${POSTGRES_USER:-helpdesk}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-helpdesk}
 
     ports:
       - "5432:5432"
@@ -15,10 +34,16 @@ services:
       - postgres-data:/var/lib/postgresql
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U helpdesk -d it_helpdesk"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-helpdesk} -d ${POSTGRES_DB:-it_helpdesk}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
+
+    restart: unless-stopped
 
   postgres-test:
     image: postgres:18-alpine
