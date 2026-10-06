@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint --fix",
+    "db:migrate:deploy": "prisma migrate deploy --config prisma7.config.ts",
     "db:seed": "prisma db seed --config prisma7.config.ts",
     "db:test:up": "docker compose --profile test up -d --wait postgres-test",
     "typecheck": "tsc --noEmit",

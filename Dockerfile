@@ -23,7 +23,18 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
 RUN mkdir -p public
+RUN pnpm prisma generate
 RUN pnpm build
+
+FROM base AS migrator
+
+ENV NODE_ENV=production
+
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml prisma7.config.ts ./
+COPY prisma ./prisma
+
+CMD ["pnpm", "db:migrate:deploy"]
 
 FROM node:22-bookworm-slim AS runner
 

@@ -13,10 +13,26 @@ services:
       - "${APP_PORT:-3000}:3000"
 
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
 
     restart: unless-stopped
+
+  migrate:
+    build:
+      context: .
+      target: migrator
+
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-helpdesk}:${POSTGRES_PASSWORD:-helpdesk}@postgres:5432/${POSTGRES_DB:-it_helpdesk}?sslmode=disable
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    restart: "no"
 
   postgres:
     image: postgres:18-alpine
