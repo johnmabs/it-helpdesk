@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EmptyState } from "@/app/ui/empty-state";
@@ -14,6 +15,10 @@ import { TicketPriority } from "@/modules/tickets/domain/ticket-priority";
 import { TicketStatus } from "@/modules/tickets/domain/ticket-status";
 
 import { TicketListPagination } from "./ticket-list-pagination";
+
+export const metadata: Metadata = {
+  title: "Tickets",
+};
 
 type TicketsPageProps = {
   searchParams: Promise<
@@ -150,13 +155,13 @@ export default async function TicketsPage({
           <table>
             <thead>
               <tr>
-                <th>Titre</th>
-                <th>Priorité</th>
-                <th>Catégorie</th>
-                <th>Statut</th>
-                <th>Créé par</th>
-                <th>Assigné à</th>
-                <th>Date</th>
+                <th scope="col">Titre</th>
+                <th scope="col">Priorité</th>
+                <th scope="col">Catégorie</th>
+                <th scope="col">Statut</th>
+                <th scope="col">Créé par</th>
+                <th scope="col">Assigné à</th>
+                <th scope="col">Date</th>
               </tr>
             </thead>
 

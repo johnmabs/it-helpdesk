@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ActionFeedback } from "@/app/ui/action-feedback";
@@ -14,6 +15,10 @@ import { listAssignableUsers } from "@/modules/users/application/list-assignable
 import { AddTicketCommentForm } from "./add-ticket-comment-form";
 import { TicketActions } from "./ticket-actions";
 import { TicketHistoryTimeline } from "./ticket-history-timeline";
+
+export const metadata: Metadata = {
+  title: "Détail du ticket",
+};
 
 type PageProps = {
   params: Promise<{

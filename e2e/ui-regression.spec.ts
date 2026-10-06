@@ -13,27 +13,32 @@ test("keeps the authenticated shell coherent across primary screens", async ({
       path: "/dashboard",
       heading: "Dashboard",
       navigationItem: "Vue d’ensemble",
+      title: "Dashboard | IT Helpdesk",
     },
     {
       path: "/dashboard/tickets",
       heading: "Tickets",
       navigationItem: "Tickets",
+      title: "Tickets | IT Helpdesk",
     },
     {
       path: "/dashboard/tickets/new",
       heading: "Nouveau ticket",
       navigationItem: "Nouveau ticket",
+      title: "Nouveau ticket | IT Helpdesk",
     },
     {
       path: "/dashboard/categories",
       heading: "Administration des catégories",
       navigationItem: "Catégories",
+      title: "Catégories | IT Helpdesk",
     },
   ];
 
   for (const screen of screens) {
     await page.goto(screen.path);
 
+    await expect(page).toHaveTitle(screen.title);
     await expect(page.getByRole("banner")).toBeVisible();
     await expect(
       page.getByRole("heading", { name: screen.heading, level: 1 }),
@@ -44,6 +49,22 @@ test("keeps the authenticated shell coherent across primary screens", async ({
         .getByRole("link", { name: screen.navigationItem }),
     ).toHaveAttribute("aria-current", "page");
   }
+});
+
+test("exposes the user menu to keyboard users", async ({ page }) => {
+  await loginAsAdmin(page);
+  await page.goto("/dashboard");
+
+  const userMenu = page.locator(".user-menu summary");
+
+  await userMenu.focus();
+  await expect(userMenu).toBeFocused();
+  await page.keyboard.press("Enter");
+
+  await expect(
+    page.getByRole("button", { name: "Se déconnecter" }),
+  ).toBeVisible();
+  await expect(userMenu).toHaveCSS("outline-style", "solid");
 });
 
 test("offers a keyboard shortcut to reach the main content", async ({

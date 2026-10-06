@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { LoginForm } from "./login-form";
+
+export const metadata: Metadata = {
+  title: "Connexion",
+};
 
 export default async function LoginPage() {
   const session = await auth();

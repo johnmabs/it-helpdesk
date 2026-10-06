@@ -23,7 +23,7 @@ export function SubmitButton({
       className={`button button-${variant}`}
       type="submit"
       disabled={isDisabled}
-      aria-disabled={isDisabled}
+      aria-busy={pending || undefined}
     >
       {pending ? <span className="button-spinner" aria-hidden="true" /> : null}
       {pending ? pendingLabel : children}

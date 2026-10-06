@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EmptyState } from "@/app/ui/empty-state";
@@ -10,6 +11,10 @@ import {
   UpdateCategoryForm,
 } from "./category-forms";
 import { requireCategoryAdministrator } from "./require-category-administrator";
+
+export const metadata: Metadata = {
+  title: "Catégories",
+};
 
 export default async function CategoriesPage() {
   await requireCategoryAdministrator();

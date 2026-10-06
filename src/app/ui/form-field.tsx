@@ -18,9 +18,12 @@ export function FormField({
       <label htmlFor={id}>
         {label}
         {required ? (
-          <span className="form-required" aria-hidden="true">
-            *
-          </span>
+          <>
+            <span className="form-required" aria-hidden="true">
+              *
+            </span>
+            <span className="visually-hidden"> (obligatoire)</span>
+          </>
         ) : null}
       </label>
       {children}

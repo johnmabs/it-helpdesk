@@ -29,6 +29,23 @@ a {
   color: inherit;
 }
 
+:where(a, summary):focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 button,
 input,
 select,
@@ -138,7 +155,6 @@ textarea {
 .app-navigation-link:focus-visible {
   background: rgb(255 255 255 / 8%);
   color: white;
-  outline: none;
 }
 
 .app-navigation-link.is-active {
@@ -236,7 +252,6 @@ textarea {
 .user-menu summary:focus-visible,
 .user-menu[open] summary {
   background: #f1f4f9;
-  outline: none;
 }
 
 .user-avatar {
@@ -1138,6 +1153,8 @@ textarea {
   *::before,
   *::after {
     scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

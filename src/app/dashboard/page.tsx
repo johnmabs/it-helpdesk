@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EmptyState } from "@/app/ui/empty-state";
@@ -9,6 +10,10 @@ import { listRecentTickets } from "@/modules/tickets/application/list-recent-tic
 import { UserRole } from "@/modules/users/domain/user-role";
 
 import { TechnicianWorkloadView } from "./technician-workload";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 
 export default async function DashboardPage() {
   const user = await requireAuthenticatedUser();
@@ -100,12 +105,12 @@ export default async function DashboardPage() {
             <table>
               <thead>
                 <tr>
-                  <th>Titre</th>
-                  <th>Priorité</th>
-                  <th>Catégorie</th>
-                  <th>Statut</th>
-                  <th>Assigné à</th>
-                  <th>Dernière activité</th>
+                  <th scope="col">Titre</th>
+                  <th scope="col">Priorité</th>
+                  <th scope="col">Catégorie</th>
+                  <th scope="col">Statut</th>
+                  <th scope="col">Assigné à</th>
+                  <th scope="col">Dernière activité</th>
                 </tr>
               </thead>
 
