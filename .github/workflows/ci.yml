@@ -102,3 +102,58 @@ jobs:
 
       - name: Integration tests
         run: pnpm test:integration
+
+  end-to-end:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: it_helpdesk_test
+          POSTGRES_USER: helpdesk
+          POSTGRES_PASSWORD: helpdesk
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U helpdesk -d it_helpdesk_test"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      AUTH_SECRET: ci-only-auth-secret-with-at-least-32-characters
+      TEST_DATABASE_URL: postgresql://helpdesk:helpdesk@127.0.0.1:5432/it_helpdesk_test?sslmode=disable
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
