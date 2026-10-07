@@ -151,6 +151,8 @@ La [galerie des sept écrans](docs/screenshots.md) présente la connexion, le
 dashboard, la liste, la création, le détail, l'historique et les catégories.
 Les captures utilisent exclusivement des données fictives.
 
+![Dashboard IT Helpdesk avec des tickets fictifs](docs/screenshots/dashboard.png)
+
 ## Roadmap
 
 - Rendre atomiques la mutation et son événement d'historique ; ajouter un
