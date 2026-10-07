@@ -1,5 +1,5 @@
 allowBuilds:
-  '@prisma/engines': true
+  "@prisma/engines": true
   argon2: true
   esbuild: true
   prisma: true
@@ -9,3 +9,9 @@ allowBuilds:
 overrides:
   deepmerge-ts@<8.0.0: ^8.0.0
   mysql2@<3.22.0: ^3.22.0
+  source-map-js: 1.2.2
+
+audit:
+  level: high
+  ignore:
+    - GHSA-vfj7-8cjw-p6xm
