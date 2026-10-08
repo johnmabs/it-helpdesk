@@ -17,5 +17,7 @@ docker-compose*.yml
 *.tsbuildinfo
 
 e2e
+# Screenshot tooling imports E2E helpers and is not needed in the image.
+docs/scripts
 **/*.test.ts
 **/*.test.tsx
